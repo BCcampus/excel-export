@@ -16,7 +16,7 @@ Exports the custom post type "event" and all users. Please note the dashboard fi
 
 == Installation ==
 
-1. Upload `eypd-export.hp` to the `/wp-content/plugins/` directory
+1. Upload `eypd-export.php` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Visit the users or event screen in your dashboard, and click on the newly added "Export to Excel" button.
 
@@ -24,4 +24,4 @@ Exports the custom post type "event" and all users. Please note the dashboard fi
 
 = Can this plugin work with other custom post types? =
 
-At this time, this plugin is limited to working with the custom post type of "event", we have plans in the future ot make this work with any and all post types.
+At this time, this plugin is limited to working with the custom post type of "event", we have plans in the future to make this work with any and all post types.
