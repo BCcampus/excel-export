@@ -58,7 +58,7 @@ function export() {
 		if ( current_user_can( 'manage_options' ) ) {
 
 			// Create a new PHPExcel object
-			$objPHPExcel = new PHPExcel();
+			$objPHPExcel = new \PHPExcel();
 
 			// User data
 			if ( isset( $_POST['users_export'] ) ) {
@@ -174,7 +174,7 @@ function export() {
 		header( 'Cache-Control: max-age=0' );
 
 		// Save Excel file
-		$objWriter = PHPExcel_IOFactory::createWriter( $objPHPExcel, 'Excel2007' );
+		$objWriter = \PHPExcel_IOFactory::createWriter( $objPHPExcel, 'Excel2007' );
 		$objWriter->save( 'php://output' );
 
 		exit();
