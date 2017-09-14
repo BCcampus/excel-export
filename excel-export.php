@@ -131,23 +131,46 @@ function export() {
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Owner' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Status' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'Published date' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Start date' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'End date' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Start time' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'H1', esc_html__( 'End time' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'I1', esc_html__( 'Presenter' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'J1', esc_html__( 'Registration Contact E-mail' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'K1', esc_html__( 'Location ID' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'L1', esc_html__( 'Event ID' ) );
 
 				// Get the data we want from each event
 				foreach ( $posts as $post ) {
 					$cell_count ++;
 
 					$title     = $post->post_title;
-					$date      = $post->post_date;
-					$status    = $post->post_status;
 					$author_id = $post->post_author;;
-					$author   = get_the_author_meta( 'display_name', $author_id );
-					$location = get_post_meta( $post->ID, 'location', true );
+					$author     = get_the_author_meta( 'display_name', $author_id );
+					$status     = $post->post_status;
+					$date_pub   = $post->post_date;
+					$start      = $post->_event_start_date;
+					$end        = $post->_event_end_date;
+					$start_time = $post->_event_start_time;
+					$end_time   = $post->_event_end_time;
+					$presenter  = $post->{'Presenter(s)'};
+					$reg_email  = $post->{'Registration Contact Email'};
+					$location_id   = $post->_location_id;
+					$event_id   = $post->_event_id;
 
 					// Add the event data to the appropriate column
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'A' . $cell_count . '', $title );
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'B' . $cell_count . '', $author );
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'C' . $cell_count . '', $status );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $date );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $date_pub );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'E' . $cell_count . '', $start );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $end );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'G' . $cell_count . '', $start_time );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'H' . $cell_count . '', $end_time );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'I' . $cell_count . '', $presenter );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'J' . $cell_count . '', $reg_email );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'K' . $cell_count . '', $location_id );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'L' . $cell_count . '', $event_id );
 
 				}
 
