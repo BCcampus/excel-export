@@ -1,4 +1,4 @@
-# eypd-export
+# excel-export
 Adds an export button to the admin user and event screens to export all event and user data.
 
 ## Description ##
@@ -7,7 +7,7 @@ Exports the custom post type "event" and all users. Please note the dashboard fi
 
 ## Installation ##
 
-1. Upload `eypd-export.php` to the `/wp-content/plugins/` directory
+1. Upload `excel-export.php` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Visit the users or event screen in your dashboard, and click on the newly added "Export to Excel" button.
 
@@ -19,4 +19,4 @@ At this time, this plugin is limited to working with the custom post type of "ev
 
 ## Screenshots ##
 
-![Export Button](https://github.com/BCcampus/eypd-export/blob/master/assets/img/export_button.png)
+![Export Button](https://github.com/BCcampus/excel-export/blob/master/assets/img/export_button.png)

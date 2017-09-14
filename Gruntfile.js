@@ -9,7 +9,7 @@ module.exports = function( grunt ) {
 
 		addtextdomain: {
 			options: {
-				textdomain: 'eypd-export',
+				textdomain: 'excel-export',
 			},
 			update_all_domains: {
 				options: {
@@ -31,8 +31,8 @@ module.exports = function( grunt ) {
 			target: {
 				options: {
 					domainPath: '/languages',
-					mainFile: 'eypd-export.php',
-					potFilename: 'eypd-export.pot',
+					mainFile: 'excel-export.php',
+					potFilename: 'excel-export.pot',
 					potHeaders: {
 						poedit: true,
 						'x-poedit-keywordslist': true

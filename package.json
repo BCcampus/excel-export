@@ -1,6 +1,6 @@
 
 {
-  "name": "eypd-export",
+  "name": "excel-export",
   "version": "0.1.0",
   "main": "Gruntfile.js",
   "author": "YOUR NAME HERE",

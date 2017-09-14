@@ -1,4 +1,4 @@
-=== Eypd Export ===
+=== Excel Export ===
 Contributors: aparedes, bdolor
 Donate link: http://bccampus.ca
 Tags: comments, spam
@@ -16,7 +16,7 @@ Exports the custom post type "event" and all users. Please note the dashboard fi
 
 == Installation ==
 
-1. Upload `eypd-export.php` to the `/wp-content/plugins/` directory
+1. Upload `excel-export.php` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Visit the users or event screen in your dashboard, and click on the newly added "Export to Excel" button.
 

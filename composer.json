@@ -1,0 +1,48 @@
+{
+  "name": "bccampus/excel-export",
+  "description": "Allows admins to export data to an excel file",
+  "license": "GPL",
+  "homepage": "https://github.com/BCcampus/excel-export/",
+  "authors": [
+    {
+      "name": "Alex Paredes",
+      "email": "aparedes@bccampus.ca"
+    },
+    {
+      "name": "Brad Payne",
+      "email": "brad@bradpayne.ca"
+    }
+  ],
+  "keywords": [
+    "excel",
+    "export"
+  ],
+  "support": {
+    "issues": "https://github.com/Bccampus/excel-export/issues",
+    "source": "https://github.com/BCcampus/excel-export/"
+  },
+  "require": {
+    "phpoffice/phpexcel": "1.8.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.7",
+    "humanmade/coding-standards": "^0.2.1"
+  },
+  "archive": {
+    "exclude": [
+      ".gitignore",
+      ".travis.yml",
+      "phpunit.xml",
+      "tests"
+    ]
+  },
+  "scripts": {
+    "test": [
+      "vendor/bin/phpunit --configuration phpunit.xml --coverage-clover coverage.xml",
+      "@standards"
+    ],
+    "standards": [
+      "vendor/bin/phpcs --standard=phpcs.ruleset.xml *.php ."
+    ]
+  }
+}

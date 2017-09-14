@@ -2,7 +2,7 @@
 /**
  * Class SampleTest
  *
- * @package Eypd_Export
+ * @package BCcampus\Export
  */
 
 /**

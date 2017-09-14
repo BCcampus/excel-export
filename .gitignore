@@ -8,4 +8,4 @@ node_modules/
 !vendor
 vendor/*
 !vendor/autoload.php
-!vendor/phpoffice/phpexcel
+!vendor/phpoffice
