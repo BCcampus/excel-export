@@ -37,11 +37,11 @@ function export_button() {
 			$unique_name = 'events_export';
 		}
 		?>
-        <script type="text/javascript">
-            jQuery(document).ready(function ($) {
-                $('.tablenav.top .clear, .tablenav.bottom .clear').before('<form action="#" method="POST"><input type="hidden" id="wp_excel_export" name="<?php echo $unique_name; ?>" value="1" /><input class="button button-primary export_button" style="margin-top:3px;" type="submit" value="<?php esc_attr_e( 'Export to Excel' );?>" /></form>');
-            });
-        </script>
+		<script type="text/javascript">
+			jQuery(document).ready(function ($) {
+				$('.tablenav.top .clear, .tablenav.bottom .clear').before('<form action="#" method="POST"><input type="hidden" id="wp_excel_export" name="<?php echo $unique_name; ?>" value="1" /><input class="button button-primary export_button" style="margin-top:3px;" type="submit" value="<?php esc_attr_e( 'Export to Excel' );?>" /></form>');
+			});
+		</script>
 		<?php
 	}
 }
@@ -101,7 +101,6 @@ function export() {
 					$url               = $user->user_url;
 					$registration_date = $user->user_registered;
 					$cert_expire       = ( isset( $user_meta['eypd_cert_expire'][0] ) && $user_meta['eypd_cert_expire'][0] != '' ) ? $user_meta['eypd_cert_expire'][0] : '';
-
 
 					// Add the user data to the appropriate column
 					$objPHPExcel->setActiveSheetIndex( 0 );
@@ -164,7 +163,7 @@ function export() {
 					$cell_count ++;
 
 					$title     = $post->post_title;
-					$author_id = $post->post_author;;
+					$author_id = $post->post_author;
 					$author      = get_the_author_meta( 'display_name', $author_id );
 					$status      = $post->post_status;
 					$date_pub    = $post->post_date;
