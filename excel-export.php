@@ -79,16 +79,29 @@ function export() {
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Last Name' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Email' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'User Role' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Nickname' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Last Activity' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Phone' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'H1', esc_html__( 'Website' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'I1', esc_html__( 'Registration Date' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'J1', esc_html__( 'Certification Expires' ) );
 
 				// Get the data we want from each user
 				foreach ( $wp_users as $user ) {
 					$cell_count ++;
 
-					$user_meta  = get_user_meta( $user->ID );
-					$role       = implode( ',', $user->roles );
-					$email      = $user->user_email;
-					$first_name = ( isset( $user_meta['first_name'][0] ) && $user_meta['first_name'][0] != '' ) ? $user_meta['first_name'][0] : '';
-					$last_name  = ( isset( $user_meta['last_name'][0] ) && $user_meta['last_name'][0] != '' ) ? $user_meta['last_name'][0] : '';
+					$user_meta         = get_user_meta( $user->ID );
+					$first_name        = ( isset( $user_meta['first_name'][0] ) && $user_meta['first_name'][0] != '' ) ? $user_meta['first_name'][0] : '';
+					$last_name         = ( isset( $user_meta['last_name'][0] ) && $user_meta['last_name'][0] != '' ) ? $user_meta['last_name'][0] : '';
+					$nickname          = ( isset( $user_meta['nickname'][0] ) && $user_meta['nickname'][0] != '' ) ? $user_meta['nickname'][0] : '';
+					$role              = implode( ',', $user->roles );
+					$email             = $user->user_email;
+					$activity          = ( isset( $user_meta['last_activity'][0] ) && $user_meta['last_activity'][0] != '' ) ? $user_meta['last_activity'][0] : '';
+					$phone             = ( isset( $user_meta['dbem_phone'][0] ) && $user_meta['dbem_phone'][0] != '' ) ? $user_meta['dbem_phone'][0] : '';
+					$url               = $user->user_url;
+					$registration_date = $user->user_registered;
+					$cert_expire       = ( isset( $user_meta['eypd_cert_expire'][0] ) && $user_meta['eypd_cert_expire'][0] != '' ) ? $user_meta['eypd_cert_expire'][0] : '';
+
 
 					// Add the user data to the appropriate column
 					$objPHPExcel->setActiveSheetIndex( 0 );
@@ -96,6 +109,12 @@ function export() {
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'B' . $cell_count . '', $last_name );
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'C' . $cell_count . '', $email );
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $role );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'E' . $cell_count . '', $nickname );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $activity );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'G' . $cell_count . '', $phone );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'H' . $cell_count . '', $url );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'I' . $cell_count . '', $registration_date );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'J' . $cell_count . '', $cert_expire );
 
 				}
 
@@ -146,17 +165,17 @@ function export() {
 
 					$title     = $post->post_title;
 					$author_id = $post->post_author;;
-					$author     = get_the_author_meta( 'display_name', $author_id );
-					$status     = $post->post_status;
-					$date_pub   = $post->post_date;
-					$start      = $post->_event_start_date;
-					$end        = $post->_event_end_date;
-					$start_time = $post->_event_start_time;
-					$end_time   = $post->_event_end_time;
-					$presenter  = $post->{'Presenter(s)'};
-					$reg_email  = $post->{'Registration Contact Email'};
-					$location_id   = $post->_location_id;
-					$event_id   = $post->_event_id;
+					$author      = get_the_author_meta( 'display_name', $author_id );
+					$status      = $post->post_status;
+					$date_pub    = $post->post_date;
+					$start       = $post->_event_start_date;
+					$end         = $post->_event_end_date;
+					$start_time  = $post->_event_start_time;
+					$end_time    = $post->_event_end_time;
+					$presenter   = $post->{'Presenter(s)'};
+					$reg_email   = $post->{'Registration Contact Email'};
+					$location_id = $post->_location_id;
+					$event_id    = $post->_event_id;
 
 					// Add the event data to the appropriate column
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'A' . $cell_count . '', $title );
