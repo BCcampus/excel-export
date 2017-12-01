@@ -74,17 +74,17 @@ function export() {
 				$wp_users   = get_users( $args );
 				$cell_count = 1;
 
-				// Loop over each user
+				// User Meta
 				foreach ( $wp_users as $user ) {
 					$cell_count ++;
 					$column_letter = '';
 
-					// Get all the user meta data for $user_id
+					// Get the meta
 					$user_meta = array_map( function ( $a ) {
 						return $a[0];
 					}, get_user_meta( $user->ID ) );
 
-					// Add the user data to the appropriate column
+					// Add user meta to appropriate column
 					$objPHPExcel->setActiveSheetIndex( 0 );
 					foreach ( $user_meta as $meta ) {
 						( $column_letter === '' ) ? $column_letter = 'A' : $column_letter ++;
