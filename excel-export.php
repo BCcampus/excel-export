@@ -93,13 +93,15 @@ function export() {
 					}
 				}
 
+				//Get Column names, user_id 1 as placeholder
+				$user_meta        = get_user_meta( 1 );
+				$user_meta_fields = array_keys( $user_meta );
 				// Setup column labels
-				$array_of_field_names = array( "FieldName1", "FieldName2", "FieldName3" );
-				$column_letter        = '';
+				$column_letter = '';
 
-				foreach ( $array_of_field_names as $field ) {
+				foreach ( $user_meta_fields as $field ) {
 					( $column_letter === '' ) ? $column_letter = 'A' : $column_letter ++;
-					$array_of_field_names[ $field ] += 1;
+					$user_meta_fields[ $field ] += 1;
 					$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
 				}
 
