@@ -74,35 +74,23 @@ function export() {
 				$wp_users   = get_users( $args );
 				$cell_count = 1;
 
-				// Get the data we want from each user
+				// Loop over each user
 				foreach ( $wp_users as $user ) {
 					$cell_count ++;
+					$column_letter = '';
 
-					$user_meta         = get_user_meta( $user->ID );
-					$first_name        = ( isset( $user_meta['first_name'][0] ) && $user_meta['first_name'][0] != '' ) ? $user_meta['first_name'][0] : '';
-					$last_name         = ( isset( $user_meta['last_name'][0] ) && $user_meta['last_name'][0] != '' ) ? $user_meta['last_name'][0] : '';
-					$nickname          = ( isset( $user_meta['nickname'][0] ) && $user_meta['nickname'][0] != '' ) ? $user_meta['nickname'][0] : '';
-					$role              = implode( ',', $user->roles );
-					$email             = $user->user_email;
-					$activity          = ( isset( $user_meta['last_activity'][0] ) && $user_meta['last_activity'][0] != '' ) ? $user_meta['last_activity'][0] : '';
-					$phone             = ( isset( $user_meta['dbem_phone'][0] ) && $user_meta['dbem_phone'][0] != '' ) ? $user_meta['dbem_phone'][0] : '';
-					$url               = $user->user_url;
-					$registration_date = $user->user_registered;
-					$cert_expire       = ( isset( $user_meta['eypd_cert_expire'][0] ) && $user_meta['eypd_cert_expire'][0] != '' ) ? $user_meta['eypd_cert_expire'][0] : '';
+					// Get all the user meta data for $user_id
+					$user_meta = array_map( function ( $a ) {
+						return $a[0];
+					}, get_user_meta( $user->ID ) );
 
 					// Add the user data to the appropriate column
 					$objPHPExcel->setActiveSheetIndex( 0 );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'A' . $cell_count . '', $first_name );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'B' . $cell_count . '', $last_name );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'C' . $cell_count . '', $email );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $role );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'E' . $cell_count . '', $nickname );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $activity );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'G' . $cell_count . '', $phone );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'H' . $cell_count . '', $url );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'I' . $cell_count . '', $registration_date );
-					$objPHPExcel->getActiveSheet()->SetCellValue( 'J' . $cell_count . '', $cert_expire );
-
+					foreach ( $user_meta as $meta ) {
+						( $column_letter === '' ) ? $column_letter = 'A' : $column_letter ++;
+						$user_meta[ $meta ] += 1;
+						$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . $cell_count . '', $meta );
+					}
 				}
 
 				// Setup column labels
