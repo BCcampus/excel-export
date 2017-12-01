@@ -37,11 +37,11 @@ function export_button() {
 			$unique_name = 'events_export';
 		}
 		?>
-		<script type="text/javascript">
-			jQuery(document).ready(function ($) {
-				$('.tablenav.top .clear, .tablenav.bottom .clear').before('<form action="#" method="POST"><input type="hidden" id="wp_excel_export" name="<?php echo $unique_name; ?>" value="1" /><input class="button button-primary export_button" style="margin-top:3px;" type="submit" value="<?php esc_attr_e( 'Export to Excel' );?>" /></form>');
-			});
-		</script>
+        <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+                $('.tablenav.top .clear, .tablenav.bottom .clear').before('<form action="#" method="POST"><input type="hidden" id="wp_excel_export" name="<?php echo $unique_name; ?>" value="1" /><input class="button button-primary export_button" style="margin-top:3px;" type="submit" value="<?php esc_attr_e( 'Export to Excel' );?>" /></form>');
+            });
+        </script>
 		<?php
 	}
 }
@@ -74,18 +74,6 @@ function export() {
 				$wp_users   = get_users( $args );
 				$cell_count = 1;
 
-				// Set up column labels
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'A1', esc_html__( 'First Name' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Last Name' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Email' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'User Role' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Nickname' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Last Activity' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Phone' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'H1', esc_html__( 'Website' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'I1', esc_html__( 'Registration Date' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'J1', esc_html__( 'Certification Expires' ) );
-
 				// Get the data we want from each user
 				foreach ( $wp_users as $user ) {
 					$cell_count ++;
@@ -115,6 +103,16 @@ function export() {
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'I' . $cell_count . '', $registration_date );
 					$objPHPExcel->getActiveSheet()->SetCellValue( 'J' . $cell_count . '', $cert_expire );
 
+				}
+
+				// Setup column labels
+				$array_of_field_names = array( "FieldName1", "FieldName2", "FieldName3" );
+				$column_letter        = '';
+
+				foreach ( $array_of_field_names as $field ) {
+					( $column_letter === '' ) ? $column_letter = 'A' : $column_letter ++;
+					$array_of_field_names[ $field ] += 1;
+					$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
 				}
 
 				// Set document properties
@@ -162,8 +160,8 @@ function export() {
 				foreach ( $posts as $post ) {
 					$cell_count ++;
 
-					$title     = $post->post_title;
-					$author_id = $post->post_author;
+					$title       = $post->post_title;
+					$author_id   = $post->post_author;
 					$author      = get_the_author_meta( 'display_name', $author_id );
 					$status      = $post->post_status;
 					$date_pub    = $post->post_date;
