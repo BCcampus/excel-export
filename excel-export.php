@@ -60,10 +60,10 @@ function export() {
 			// Create a new PHPExcel object
 			$objPHPExcel = new \PHPExcel();
 
-			// User data
+			// Check if User data is being requested
 			if ( isset( $_POST['users_export'] ) ) {
 
-				// User args
+				// Args for the user query
 				$args = array(
 					'order'   => 'ASC',
 					'orderby' => 'display_name',
@@ -74,33 +74,67 @@ function export() {
 				$wp_users   = get_users( $args );
 				$cell_count = 1;
 
-				// User Meta
+				// Get User Data and Meta for each user
 				foreach ( $wp_users as $user ) {
 					$cell_count ++;
-					$column_letter = '';
 
-					// Get the meta
+					// Get basic user data
+					$user_info    = get_userdata( $user->ID );
+					$id           = $user_info->ID;
+					$username     = $user_info->user_login;
+					$email        = $user_info->user_email;
+					$url          = $user_info->user_url;
+					$registered   = $user_info->user_registered;
+					$login        = $user_info->user_login;
+					$display_name = $user_info->display_name;
+
+					// Get all the meta, run array_map to take only the first index of each result
 					$user_meta = array_map( function ( $a ) {
 						return $a[0];
 					}, get_user_meta( $user->ID ) );
 
-					// Add user meta to appropriate column
+					// Add basic user data to appropriate column
 					$objPHPExcel->setActiveSheetIndex( 0 );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'A' . $cell_count . '', $id );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'B' . $cell_count . '', $username );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'C' . $cell_count . '', $email );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $url );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'E' . $cell_count . '', $registered );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $login );
+					$objPHPExcel->getActiveSheet()->SetCellValue( 'G' . $cell_count . '', $display_name );
+
+					// Offset column letter, A-G reserved for basic user data
+					$column_letter = 'G';
+
+					// Add all user meta to appropriate column
 					foreach ( $user_meta as $meta ) {
-						( $column_letter === '' ) ? $column_letter = 'A' : $column_letter ++;
+						$column_letter ++;
 						$user_meta[ $meta ] += 1;
 						$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . $cell_count . '', $meta );
 					}
 				}
 
-				//Get Column names, user_id 1 as placeholder
-				$user_meta        = get_user_meta( 1 );
-				$user_meta_fields = array_keys( $user_meta );
-				// Setup column labels
-				$column_letter = '';
+				// user_id 1 as a placeholder to get column labels
+				$user_meta = get_user_meta( 1 );
 
+				// Get all the keys, we'll use them as Column labels
+				$user_meta_fields = array_keys( $user_meta );
+
+				// Reset column letter offset, A-G reserved for basic user data
+				$column_letter = 'G';
+
+				// Set up column labels for basic user data
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'A1', esc_html__( 'User ID' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Username' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Email' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'URL' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Registration Date' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Login' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Display Name' ) );
+
+				// Set up column labels for user meta
 				foreach ( $user_meta_fields as $field ) {
-					( $column_letter === '' ) ? $column_letter = 'A' : $column_letter ++;
+					$column_letter ++;
 					$user_meta_fields[ $field ] += 1;
 					$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
 				}
