@@ -74,6 +74,27 @@ function export() {
 				$wp_users   = get_users( $args );
 				$cell_count = 1;
 
+				// BuddyPress user data
+				$bp_field_names = array();
+				$bp_field_ids   = array();
+
+				// Get BuddyPress profile data if available
+				if ( function_exists( 'bp_is_active' ) ) {
+
+					$profile_groups = \BP_XProfile_Group::get( array( 'fetch_fields' => true ) );
+
+					if ( ! empty( $profile_groups ) ) {
+						foreach ( $profile_groups as $profile_group ) {
+							if ( ! empty( $profile_group->fields ) ) {
+								foreach ( $profile_group->fields as $field ) {
+									$bp_field_names[] = $field->name;
+									$bp_field_ids[]   = $field->id; // get field value by using BP_XProfile_ProfileData::get_value_byid()
+								}
+							}
+						}
+					}
+				}
+
 				// Get User Data and Meta for each user
 				foreach ( $wp_users as $user ) {
 					$cell_count ++;
@@ -92,6 +113,7 @@ function export() {
 					$user_meta = array_map( function ( $a ) {
 						return $a[0];
 					}, get_user_meta( $user->ID ) );
+
 
 					// Add basic user data to appropriate column
 					$objPHPExcel->setActiveSheetIndex( 0 );
@@ -112,6 +134,7 @@ function export() {
 						$user_meta[ $meta ] += 1;
 						$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . $cell_count . '', $meta );
 					}
+
 				}
 
 				// user_id 1 as a placeholder to get column labels
@@ -131,6 +154,14 @@ function export() {
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Registration Date' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Login' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Display Name' ) );
+
+				/*				// Set up column labels for Buddy Press
+								foreach ( $bp_fields as $field ) {
+									$column_letter ++;
+									$bp_fields[ $field ] += 1;
+									$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
+								}
+				*/
 
 				// Set up column labels for user meta
 				foreach ( $user_meta_fields as $field ) {
