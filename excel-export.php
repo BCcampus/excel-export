@@ -54,6 +54,8 @@ function export_page() {
 	// page content
 	$html = '<form action="#" method="POST">';
 	$html .= '<p><h1>Excel Export<span class="dashicons dashicons-download"></span></h1></p>';
+	// make secure
+	wp_nonce_field( 'export_button_action' );
 	// Export Post button
 	$html .= '<hr><p><h2>Export Posts:</h2><p>The following post types were found on your website and can be exported: </p>';
 	$html .= '<select id="excel_export_users" name="export_posts" />';
@@ -63,9 +65,9 @@ function export_page() {
 		echo '<option value="' . $post_type . '">' . $post_type . '</option>';
 	}
 	$html .= '</select><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_posts_submit" name="export_posts_submit" value="Export" /></p>';
+	$html .= '</form>';
 	// Export users button
 	$html .= '<hr><p><h2>Export Users:</h2></p>There are <u>' . $user_count['total_users'] . '</u> users in total:' . $role_count . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
-	$html .= '</form>';
 	echo $html;
 }
 
@@ -91,27 +93,27 @@ function export() {
 			$wp_users   = get_users( $args );
 			$cell_count = 1;
 
-			/*				// BuddyPress user data
-							$bp_field_names = array();
-							$bp_field_ids   = array();
+			// BuddyPress user data placeholders
+			$bp_field_ids   = array();
+			$bp_field_names = array();
+			$bp_field_data  = array();
 
-							// Get BuddyPress profile data if available
-							if ( function_exists( 'bp_is_active' ) ) {
+			// Get BuddyPress profile field ID's and names
+			if ( function_exists( 'bp_is_active' ) ) {
 
-								$profile_groups = \BP_XProfile_Group::get( array( 'fetch_fields' => true ) );
+				$profile_groups = \BP_XProfile_Group::get( array( 'fetch_fields' => true ) );
 
-								if ( ! empty( $profile_groups ) ) {
-									foreach ( $profile_groups as $profile_group ) {
-										if ( ! empty( $profile_group->fields ) ) {
-											foreach ( $profile_group->fields as $field ) {
-												$bp_field_names[] = $field->name;
-												$bp_field_ids[]   = $field->id; // get field value by using BP_XProfile_ProfileData::get_value_byid()
-											}
-										}
-									}
-								}
+				if ( ! empty( $profile_groups ) ) {
+					foreach ( $profile_groups as $profile_group ) {
+						if ( ! empty( $profile_group->fields ) ) {
+							foreach ( $profile_group->fields as $field ) {
+								$bp_field_names[] = $field->name;
+								$bp_field_ids[]   = $field->id;
 							}
-			*/
+						}
+					}
+				}
+			}
 
 			// Get User Data and Meta for each user
 			foreach ( $wp_users as $user ) {
@@ -127,6 +129,15 @@ function export() {
 				$login        = $user_info->user_login;
 				$display_name = $user_info->display_name;
 
+				if ( function_exists( 'bp_is_active' ) ) {
+					// Get the BP data for this user
+					$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $id, $bp_field_ids );
+
+					// Get the value of BP fields for this user
+					foreach ( $bp_get_data as $bp_field_value ) {
+						$bp_field_data [] = $bp_field_value->value;
+					}
+				}
 
 				// Add basic user data to appropriate column
 				$objPHPExcel->setActiveSheetIndex( 0 );
@@ -141,13 +152,16 @@ function export() {
 				// Offset column letter, A-G reserved for basic user data
 				$column_letter = 'G';
 
-				/// Get all the meta into an array, run array_map to take only the first index of each result
+				// Get all the user meta into an array, run array_map to take only the first index of each result
 				$user_meta = array_map( function ( $a ) {
 					return $a[0];
 				}, get_user_meta( $user->ID ) );
 
+				// Merge with the BuddyPress data if any
+				$all_meta = array_merge( $user_meta, $bp_field_data );
+
 				// Add each user meta to appropriate excel column
-				foreach ( $user_meta as $meta ) {
+				foreach ( $all_meta as $meta ) {
 					$column_letter ++;
 					$meta_value = unserialize( $meta ); // attempt to unserialize for readability
 					if ( ! $meta_value ) { // if unserialize() returns false, just get the meta value
@@ -163,11 +177,14 @@ function export() {
 				}
 			}
 
-			// user_id 1 as a placeholder to get column labels
+			// get column labels, user_id 1 as a placeholder
 			$user_meta = get_user_meta( 1 );
 
 			// Get all the keys, we'll use them as Column labels
 			$user_meta_fields = array_keys( $user_meta );
+
+			// Merge with BuddyPress labels if any
+			$all_meta_labels = array_merge( $user_meta_fields, $bp_field_names );
 
 			// Reset column letter offset, A-G reserved for basic user data
 			$column_letter = 'G';
@@ -181,18 +198,9 @@ function export() {
 			$objPHPExcel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Login' ) );
 			$objPHPExcel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Display Name' ) );
 
-			/*				// Set up column labels for Buddy Press
-							foreach ( $bp_fields as $field ) {
-								$column_letter ++;
-								$bp_fields[ $field ] += 1;
-								$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
-							}
-			*/
-
 			// Set up column labels for user meta
-			foreach ( $user_meta_fields as $field ) {
+			foreach ( $all_meta_labels as $field ) {
 				$column_letter ++;
-				$user_meta_fields[ $field ] += 1;
 				$objPHPExcel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
 			}
 
@@ -319,7 +327,7 @@ function export() {
 			} else { // in the unlikely event an empty or invalid post type value is entered, let's display an ugly error
 				$post_value = $_POST['export_posts'];
 				if ( $post_value === '' ) {
-					$notice = __( 'Export Error: Please enter the name of the post type to export it.', 'excel-export' );
+					$notice = __( 'Export Error: Please select a post type to export it.', 'excel-export' );
 				} else {
 					$notice = __( 'Excel Export: ' . $post_value . ' does not exist, please try a different post type.', 'excel-export' );
 				}
