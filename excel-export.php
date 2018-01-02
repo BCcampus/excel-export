@@ -65,9 +65,9 @@ function export_page() {
 		echo '<option value="' . $post_type . '">' . $post_type . '</option>';
 	}
 	$html .= '</select><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_posts_submit" name="export_posts_submit" value="Export" /></p>';
-	$html .= '</form>';
 	// Export users button
 	$html .= '<hr><p><h2>Export Users:</h2></p>There are <u>' . $user_count['total_users'] . '</u> users in total:' . $role_count . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
+	$html .= '</form>';
 	echo $html;
 }
 
@@ -284,8 +284,8 @@ function export() {
 				}
 
 				// Set up column labels
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'A1', esc_html__( 'Event Title' ) );
-				$objPHPExcel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Owner' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'A1', esc_html__( 'Title' ) );
+				$objPHPExcel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Author' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Status' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'Published date' ) );
 				$objPHPExcel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Start date' ) );
