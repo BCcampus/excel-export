@@ -17,4 +17,4 @@ Get all of your WordPress data into Excel (.XLSX file). This plugin allows you t
 
 ## Screenshots ##
 
-![Export Button](https://github.com/BCcampus/excel-export/blob/master/assets/img/settings.png.png)
+![Export Button](/assets/img/settings.png)
