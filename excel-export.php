@@ -75,11 +75,11 @@ function excel_export_page() {
 	echo $html;
 	// let's populate the select list from the post types available on this website
 	foreach ( $post_types as $post_type ) {
-		echo '<option value="' . $post_type . '">' . $post_type . '</option>';
+		echo '<option value="' . esc_attr__( $post_type ) . '">' . esc_attr__( $post_type ) . '</option>';
 	}
 	$html .= '</select><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_posts_submit" name="export_posts_submit" value="Export" /></p>';
 	// Export users button
-	$html .= '<hr><p><h2>Export Users:</h2></p>There are <u>' . $user_count['total_users'] . '</u> users in total:' . $role_count . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
+	$html .= '<hr><p><h2>Export Users:</h2></p>There are <u>' . esc_attr__( $user_count['total_users'] ) . '</u> users in total:' . esc_attr__( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
 	$html .= '</form>';
 	echo $html;
 }
@@ -252,7 +252,7 @@ function excel_export_posts() {
 
 	$objPHPExcel = new \PHPExcel(); // Create a new PHPExcel object
 
-// check if we are exporting posts
+	// check if we are exporting posts
 	if ( isset( $_POST["export_posts"] ) ) {
 
 		$post_type_requested = $_POST['export_posts'];
