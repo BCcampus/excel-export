@@ -22,13 +22,13 @@ require_once __DIR__ . '/vendor/autoload.php';
  * Check permission levels, only proceed if we can manage_options
  */
 
-add_action( 'init', __NAMESPACE__ . '\export_permissions' );
+add_action( 'init', __NAMESPACE__ . '\excel_export_permissions' );
 
-function export_permissions() {
+function excel_export_permissions() {
 	if ( current_user_can( 'manage_options' ) ) {
-		add_action( 'admin_menu', __NAMESPACE__ . '\export_admin_page' );
-		add_action( 'admin_init', __NAMESPACE__ . '\export_users' );
-		add_action( 'admin_init', __NAMESPACE__ . '\export_posts' );
+		add_action( 'admin_menu', __NAMESPACE__ . '\excel_export_admin_page' );
+		add_action( 'admin_init', __NAMESPACE__ . '\excel_export_users' );
+		add_action( 'admin_init', __NAMESPACE__ . '\excel_export_posts' );
 	} else {
 		return;
 	}
@@ -38,15 +38,15 @@ function export_permissions() {
  * Add settings menu to the dashboard, and callback function for export page
  */
 
-function export_admin_page() {
-	add_options_page( 'Excel Export Options', 'Excel Export', 'manage_options', 'excel-export', __NAMESPACE__ . '\export_page' );
+function excel_export_admin_page() {
+	add_options_page( 'Excel Export Options', 'Excel Export', 'manage_options', 'excel-export', __NAMESPACE__ . '\excel_export_page' );
 }
 
 /**
  * Settings page content
  */
 
-function export_page() {
+function excel_export_page() {
 	// user count
 	$user_count = count_users();
 	// output buffering to capture output of echo into local var
@@ -87,7 +87,8 @@ function export_page() {
 /**
  * Gets and exports the user data
  */
-function export_users() {
+
+function excel_export_users() {
 
 	$objPHPExcel = new \PHPExcel(); // Create a new PHPExcel object
 
@@ -243,12 +244,11 @@ function export_users() {
 	}
 }
 
-
 /**
  * Gets and exports the post data
  */
 
-function export_posts() {
+function excel_export_posts() {
 
 	$objPHPExcel = new \PHPExcel(); // Create a new PHPExcel object
 
