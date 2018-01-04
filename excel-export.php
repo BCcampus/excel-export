@@ -65,21 +65,26 @@ function excel_export_page() {
 	$post_types = get_post_types( $args, $output, $operator );
 
 	// page content
-	$html = '<form action="#" method="POST">';
+	$html = '<form action="#post-export" method="post">';
 	$html .= '<p><h1>Excel Export<span class="dashicons dashicons-download"></span></h1></p>';
-	// make secure
-	wp_nonce_field( 'export_button_action' );
 	// Export Post button
 	$html .= '<hr><p><h2>Export Posts:</h2><p>The following post types were found on your website and can be exported: </p>';
 	$html .= '<select id="excel_export_users" name="export_posts" />';
-	echo $html;
 	// let's populate the select list from the post types available on this website
 	foreach ( $post_types as $post_type ) {
-		echo '<option value="' . esc_attr__( $post_type ) . '">' . esc_attr__( $post_type ) . '</option>';
+		$html .= '<option value="' . esc_attr__( $post_type ) . '">' . esc_attr__( $post_type ) . '</option>';
 	}
 	$html .= '</select><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_posts_submit" name="export_posts_submit" value="Export" /></p>';
+	// nonce
+	$html .= wp_nonce_field( 'export_button_posts', 'submit_export_posts' );
+	$html .= '</form>';
+	echo $html;
+
 	// Export users button
+	$html = '<form action="#user-export" method="post">';
+	// nonce
 	$html .= '<hr><p><h2>Export Users:</h2></p>There are <u>' . esc_attr__( $user_count['total_users'] ) . '</u> users in total:' . esc_attr__( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
+	$html .= wp_nonce_field( 'export_button_users', 'submit_export_users' );
 	$html .= '</form>';
 	echo $html;
 }
@@ -89,10 +94,11 @@ function excel_export_page() {
  */
 
 function excel_export_users() {
+	// check if User data is being requested and nonce is valid
+	if ( ! empty( $_POST ) && isset( $_POST['users_export'] ) && check_admin_referer( 'export_button_users', 'submit_export_users' ) ) {
 
-	$obj_php_excel = new \PHPExcel(); // Create a new PHPExcel object
-
-	if ( isset( $_POST['users_export'] ) ) { // Check if User data is being requested
+		// Create a new PHPExcel object
+		$obj_php_excel = new \PHPExcel();
 
 		// Args for the user query
 		$args = [
@@ -240,7 +246,6 @@ function excel_export_users() {
 		$obj_writer->save( 'php://output' );
 
 		exit();
-
 	}
 }
 
@@ -249,11 +254,11 @@ function excel_export_users() {
  */
 
 function excel_export_posts() {
+	// check if Post data is being requested and nonce is valid
+	if ( ! empty( $_POST ) && isset( $_POST['export_posts'] ) && check_admin_referer( 'export_button_posts', 'submit_export_posts' ) ) {
 
-	$obj_php_excel = new \PHPExcel(); // Create a new PHPExcel object
-
-	// check if we are exporting posts
-	if ( isset( $_POST['export_posts'] ) ) {
+		// Create a new PHPExcel object
+		$obj_php_excel = new \PHPExcel();
 
 		$post_type_requested = $_POST['export_posts'];
 
