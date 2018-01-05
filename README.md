@@ -1,5 +1,5 @@
 # excel-export
-Export any of your post, custom post type, and user data to Excel file format (.XLSX) 
+Export your post, page, custom post type, and user data to Excel file format (.XLSX) 
 
 ## Description ##
 
@@ -18,3 +18,4 @@ Get all of your WordPress data into Excel (.XLSX file). This plugin allows you t
 ## Screenshots ##
 
 ![Export Button](/assets/img/settings.png)
+![Export Button](/assets/img/menu_item.png)
