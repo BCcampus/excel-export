@@ -2,11 +2,11 @@
 /**
  * Plugin Name:     Excel Export
  * Plugin URI:      https://github.com/BCcampus/excel-export
- * Description:     Export event and user data
+ * Description:     Export your posts, pages, custom post types, and user data to Excel file format (.XLSX)
  * Author:          Alex Paredes
  * Text Domain:     excel-export
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         1.0.0
  *
  * @package         Excel_Export
  */
@@ -67,23 +67,23 @@ function excel_export_page() {
 	// page content
 	$html = '<form action="#post-export" method="post">';
 	$html .= '<p><h1>Excel Export<span class="dashicons dashicons-download"></span></h1></p>';
-	// Export Post button
-	$html .= '<hr><p><h2>Export Posts:</h2><p>The following post types were found on your website and can be exported: </p>';
+	$html .= '<hr><p><h2>Export Post Types</h2><p>The following post types were found on your website: </p>';
 	$html .= '<select id="excel_export_users" name="export_posts" />';
 	// let's populate the select list from the post types available on this website
 	foreach ( $post_types as $post_type ) {
 		$html .= '<option value="' . esc_attr__( $post_type ) . '">' . esc_attr__( $post_type ) . '</option>';
 	}
+	// post export button
 	$html .= '</select><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_posts_submit" name="export_posts_submit" value="Export" /></p>';
-	// nonce
+	// post export nonce
 	$html .= wp_nonce_field( 'export_button_posts', 'submit_export_posts' );
 	$html .= '</form>';
 	echo $html;
 
-	// Export users button
+	// user export button
 	$html = '<form action="#user-export" method="post">';
-	// nonce
-	$html .= '<hr><p><h2>Export Users:</h2></p>There are <u>' . esc_attr__( $user_count['total_users'] ) . '</u> users in total:' . esc_attr__( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
+	// user export nonce
+	$html .= '<hr><p><h2>Export Users</h2></p>There are <u>' . esc_attr__( $user_count['total_users'] ) . '</u> users in total:' . esc_attr__( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
 	$html .= wp_nonce_field( 'export_button_users', 'submit_export_users' );
 	$html .= '</form>';
 	echo $html;
