@@ -39,7 +39,7 @@ function excel_export_permissions() {
  */
 
 function excel_export_admin_page() {
-	add_submenu_page( 'options-general.php', 'Excel Export', 'Excel Export', 'manage_options', 'excel-export', __NAMESPACE__ . '\excel_export_page' );
+	add_submenu_page( 'tools.php', 'Excel Export', 'Excel Export', 'manage_options', 'excel-export', __NAMESPACE__ . '\excel_export_page' );
 }
 
 /**
@@ -175,6 +175,11 @@ function excel_export_users() {
 				return $a[0];
 			}, get_user_meta( $user->ID ) );
 
+			// remove session tokens value as a preventative security measure
+			if ( isset( $user_meta['session_tokens'] ) ) {
+				unset( $user_meta['session_tokens'] );
+			}
+
 			// Merge with the BuddyPress data if any
 			$all_meta = array_merge( $user_meta, $bp_field_data );
 
@@ -195,8 +200,13 @@ function excel_export_users() {
 			}
 		}
 
-		// get column labels, user_id 1 as a placeholder
+		// get column labels, user_id 1 as a placeholder for all fields
 		$user_meta = get_user_meta( 1 );
+
+		// remove session tokens label
+		if ( isset( $user_meta['session_tokens'] ) ) {
+			unset( $user_meta['session_tokens'] );
+		}
 
 		// Get all the keys, we'll use them as Column labels
 		$user_meta_fields = array_keys( $user_meta );
