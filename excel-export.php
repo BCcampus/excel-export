@@ -39,7 +39,7 @@ function excel_export_permissions() {
  */
 
 function excel_export_admin_page() {
-	add_options_page( 'Excel Export Options', 'Excel Export', 'manage_options', 'excel-export', __NAMESPACE__ . '\excel_export_page' );
+	add_submenu_page( 'options-general.php', 'Excel Export', 'Excel Export', 'manage_options', 'excel-export', __NAMESPACE__ . '\excel_export_page' );
 }
 
 /**
