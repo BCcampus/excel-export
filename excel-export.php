@@ -144,7 +144,6 @@ function excel_export_users() {
 			$email        = $user_info->user_email;
 			$url          = $user_info->user_url;
 			$registered   = $user_info->user_registered;
-			$login        = $user_info->user_login;
 			$display_name = $user_info->display_name;
 
 			if ( function_exists( 'bp_is_active' ) ) {
@@ -164,11 +163,10 @@ function excel_export_users() {
 			$obj_php_excel->getActiveSheet()->SetCellValue( 'C' . $cell_count . '', $email );
 			$obj_php_excel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $url );
 			$obj_php_excel->getActiveSheet()->SetCellValue( 'E' . $cell_count . '', $registered );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $login );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'G' . $cell_count . '', $display_name );
+			$obj_php_excel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $display_name );
 
 			// Offset column letter, A-G reserved for basic user data
-			$column_letter = 'G';
+			$column_letter = 'F';
 
 			// Get all the user meta into an array, run array_map to take only the first index of each result
 			$user_meta = array_map( function ( $a ) {
@@ -215,7 +213,7 @@ function excel_export_users() {
 		$all_meta_labels = array_merge( $user_meta_fields, $bp_field_names );
 
 		// Reset column letter offset, A-G reserved for basic user data
-		$column_letter = 'G';
+		$column_letter = 'F';
 
 		// Set up column labels for basic user data
 		$obj_php_excel->getActiveSheet()->SetCellValue( 'A1', esc_html__( 'User ID' ) );
@@ -223,8 +221,7 @@ function excel_export_users() {
 		$obj_php_excel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Email' ) );
 		$obj_php_excel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'URL' ) );
 		$obj_php_excel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Registration Date' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Login' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'G1', esc_html__( 'Display Name' ) );
+		$obj_php_excel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
 
 		// Set up column labels for user meta
 		foreach ( $all_meta_labels as $field ) {
