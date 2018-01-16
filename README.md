@@ -11,9 +11,9 @@ Get all of your WordPress data into Excel (.XLSX file). This plugin allows you t
 
 ## Installation ##
 
-1. Upload `excel-export.php` to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Click on the "Excel Export" menu item located under the Tools menu
+1. Upload `excel-export.php` to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. Click on the "Excel Export" menu item located under the Tools menu.
 
 ## Screenshots ##
 
