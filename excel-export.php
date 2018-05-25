@@ -18,6 +18,10 @@ namespace BCcampus\Excel;
  */
 require_once __DIR__ . '/vendor/autoload.php';
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 /**
  * Check permission levels, only proceed if we can manage_options
  */
@@ -97,8 +101,9 @@ function excel_export_users() {
 	// check if User data is being requested and nonce is valid
 	if ( ! empty( $_POST ) && isset( $_POST['users_export'] ) && check_admin_referer( 'export_button_users', 'submit_export_users' ) ) {
 
-		// Create a new PHPExcel object
-		$obj_php_excel = new \PHPExcel();
+		// Create a new spreadsheet
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
 
 		// Args for the user query
 		$args = [
@@ -157,13 +162,13 @@ function excel_export_users() {
 			}
 
 			// Add basic user data to appropriate column
-			$obj_php_excel->setActiveSheetIndex( 0 );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'A' . $cell_count . '', $id );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'B' . $cell_count . '', $username );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'C' . $cell_count . '', $email );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'D' . $cell_count . '', $url );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'E' . $cell_count . '', $registered );
-			$obj_php_excel->getActiveSheet()->SetCellValue( 'F' . $cell_count . '', $display_name );
+			$spreadsheet->setActiveSheetIndex(0);
+			$sheet->SetCellValue( 'A' . $cell_count . '', $id );
+			$sheet->SetCellValue( 'B' . $cell_count . '', $username );
+			$sheet->SetCellValue( 'C' . $cell_count . '', $email );
+			$sheet->SetCellValue( 'D' . $cell_count . '', $url );
+			$sheet->SetCellValue( 'E' . $cell_count . '', $registered );
+			$sheet->SetCellValue( 'F' . $cell_count . '', $display_name );
 
 			// Offset column letter, A-G reserved for basic user data
 			$column_letter = 'F';
@@ -194,7 +199,7 @@ function excel_export_users() {
 					}
 					$meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
 				}
-				$obj_php_excel->getActiveSheet()->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
+				$sheet->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
 			}
 		}
 
@@ -216,43 +221,48 @@ function excel_export_users() {
 		$column_letter = 'F';
 
 		// Set up column labels for basic user data
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'A1', esc_html__( 'User ID' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'B1', esc_html__( 'Username' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'C1', esc_html__( 'Email' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'D1', esc_html__( 'URL' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'E1', esc_html__( 'Registration Date' ) );
-		$obj_php_excel->getActiveSheet()->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
+		$spreadsheet->setActiveSheetIndex(0);
+		$sheet->SetCellValue( 'A1', esc_html__( 'User ID' ) );
+		$sheet->SetCellValue( 'B1', esc_html__( 'Username' ) );
+		$sheet->SetCellValue( 'C1', esc_html__( 'Email' ) );
+		$sheet->SetCellValue( 'D1', esc_html__( 'URL' ) );
+		$sheet->SetCellValue( 'E1', esc_html__( 'Registration Date' ) );
+		$sheet->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
 
 		// Set up column labels for user meta
 		foreach ( $all_meta_labels as $field ) {
 			$column_letter ++;
-			$obj_php_excel->getActiveSheet()->SetCellValue( $column_letter . '1', $field );
+			$sheet->SetCellValue( $column_letter . '1', $field );
 		}
 
 		// Set document properties
-		$obj_php_excel->getProperties()->setTitle( esc_html__( 'Users' ) );
-		$obj_php_excel->getProperties()->setSubject( esc_html__( 'all users' ) );
-		$obj_php_excel->getProperties()->setDescription( esc_html__( 'Export of all users' ) );
+		$spreadsheet->getProperties()->setCreator('')
+		            ->setLastModifiedBy('')
+		            ->setTitle('Users')
+		            ->setSubject('all users')
+		            ->setDescription('Export of all users')
+		            ->setKeywords('office 2007 users export')
+		            ->setCategory('user results file');
 
 		// Rename sheet
-		$obj_php_excel->getActiveSheet()->setTitle( esc_html__( 'Users' ) );
+		$spreadsheet->getActiveSheet()->setTitle('Users');
 
-		// Rename file
-		header( 'Content-Disposition: attachment;filename="users.xlsx"' );
+		// Set active sheet index to the first sheet, so Excel opens this as the first sheet
+		$spreadsheet->setActiveSheetIndex(0);
 
-		// Set column data auto width
-		for ( $col = 'A'; $col !== 'E'; $col ++ ) {
-			$obj_php_excel->getActiveSheet()->getColumnDimension( $col )->setAutoSize( true );
-		}
 
-		header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
-		header( 'Cache-Control: max-age=0' );
+// Redirect output to a client’s web browser (Xls)
+header('Content-Type: application/vnd.ms-excel');
+header('Content-Disposition: attachment;filename="Users.Xlsx"');
+header('Cache-Control: max-age=0');
+// If you're serving to IE 9, then the following may be needed
+header('Cache-Control: max-age=1');
+
 
 		// Save Excel file
-		$obj_writer = \PHPExcel_IOFactory::createWriter( $obj_php_excel, 'Excel2007' );
-		$obj_writer->save( 'php://output' );
-
-		exit();
+$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+$writer->save('php://output');
+exit;
 	}
 }
 
@@ -265,7 +275,7 @@ function excel_export_posts() {
 	if ( ! empty( $_POST ) && isset( $_POST['export_posts'] ) && check_admin_referer( 'export_button_posts', 'submit_export_posts' ) ) {
 
 		// Create a new PHPExcel object
-		$obj_php_excel = new \PHPExcel();
+		$sheet = new \PHPExcel();
 
 		$post_type_requested = $_POST['export_posts'];
 
@@ -289,8 +299,8 @@ function excel_export_posts() {
 				foreach ( $value as $key => $val ) {
 					$post_value = $val; // get the meta value
 					$post_key   = $key; // get the key value for label
-					$obj_php_excel->getActiveSheet()->SetCellValue( $column_letter . '1', $post_key ); // Set up column labels
-					$obj_php_excel->getActiveSheet()->SetCellValue( $column_letter . '2', $post_value ); // add meta value to the right column and cell
+					$sheet->getActiveSheet()->SetCellValue( $column_letter . '1', $post_key ); // Set up column labels
+					$sheet->getActiveSheet()->SetCellValue( $column_letter . '2', $post_value ); // add meta value to the right column and cell
 					$column_letter ++; // increment column letter
 				}
 			}
@@ -299,26 +309,26 @@ function excel_export_posts() {
 			$blogtime = current_time( '--M-D-Y--H-I-s' );
 
 			// Set document properties
-			$obj_php_excel->getProperties()->setTitle( esc_html__( $post_type_requested ) );
-			$obj_php_excel->getProperties()->setSubject( esc_html__( 'all ' . $post_type_requested ) );
-			$obj_php_excel->getProperties()->setDescription( esc_html__( 'Export of all ' . $post_type_requested ) );
+			$sheet->getProperties()->setTitle( esc_html__( $post_type_requested ) );
+			$sheet->getProperties()->setSubject( esc_html__( 'all ' . $post_type_requested ) );
+			$sheet->getProperties()->setDescription( esc_html__( 'Export of all ' . $post_type_requested ) );
 
 			// Rename sheet
-			$obj_php_excel->getActiveSheet()->setTitle( esc_html__( $post_type_requested ) );
+			$sheet->getActiveSheet()->setTitle( esc_html__( $post_type_requested ) );
 
 			// Rename file
 			header( 'Content-Disposition: attachment;filename="' . $post_type_requested . $blogtime . '.xlsx"' );
 
 			// Set column data auto width
 			for ( $col = 'A'; $col !== 'E'; $col ++ ) {
-				$obj_php_excel->getActiveSheet()->getColumnDimension( $col )->setAutoSize( true );
+				$sheet->getActiveSheet()->getColumnDimension( $col )->setAutoSize( true );
 			}
 
 			header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
 			header( 'Cache-Control: max-age=0' );
 
 			// Save Excel file
-			$obj_writer = \PHPExcel_IOFactory::createWriter( $obj_php_excel, 'Excel2007' );
+			$obj_writer = \PHPExcel_IOFactory::createWriter( $sheet, 'Excel2007' );
 			$obj_writer->save( 'php://output' );
 
 			exit();
