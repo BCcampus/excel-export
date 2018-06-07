@@ -275,7 +275,7 @@ function excel_export_posts() {
 	if ( ! empty( $_POST ) && isset( $_POST['export_posts'] ) && check_admin_referer( 'export_button_posts', 'submit_export_posts' ) ) {
 
 		// Create a new PHPExcel object
-		$sheet = new \PHPExcel();
+		$sheet = new Spreadsheet();
 
 		$post_type_requested = $_POST['export_posts'];
 
@@ -328,7 +328,7 @@ function excel_export_posts() {
 			header( 'Cache-Control: max-age=0' );
 
 			// Save Excel file
-			$obj_writer = \PHPExcel_IOFactory::createWriter( $sheet, 'Excel2007' );
+			$obj_writer = IOFactory::createWriter( $sheet, 'Xlsx' );
 			$obj_writer->save( 'php://output' );
 
 			exit();
