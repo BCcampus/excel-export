@@ -23,7 +23,13 @@
     "issues": "https://github.com/Bccampus/excel-export/issues",
     "source": "https://github.com/BCcampus/excel-export/"
   },
+  "config": {
+    "platform": {
+      "php": "7.0.30"
+    }
+  },
   "require": {
+    "php": ">=7.0",
     "phpoffice/phpspreadsheet": "^1.2"
   },
   "require-dev": {
@@ -40,7 +46,7 @@
   },
   "scripts": {
     "test": [
-      "vendor/bin/phpunit --configuration phpunit.xml --coverage-clover coverage.xml",
+      "vendor/bin/phpunit --configuration phpunit.xml",
       "@standards"
     ],
     "standards": [
