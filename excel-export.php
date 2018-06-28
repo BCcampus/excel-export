@@ -16,11 +16,13 @@ namespace BCcampus\Excel;
 /**
  * Load dependencies
  */
-require_once __DIR__ . '/vendor/autoload.php';
+$composer = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $composer ) ) {
+	require $composer;
+}
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  * Check permission levels, only proceed if we can manage_options
