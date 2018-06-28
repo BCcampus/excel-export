@@ -8,11 +8,11 @@
   "authors": [
     {
       "name": "Alex Paredes",
-      "email": "aparedes@bccampus.ca"
+      "homepage": "https://github.com/alex-418"
     },
     {
       "name": "Brad Payne",
-      "email": "brad@bradpayne.ca"
+      "homepage": "https://github.com/bdolor"
     }
   ],
   "keywords": [
@@ -49,7 +49,7 @@
       "vendor/bin/phpunit --configuration phpunit.xml ."
     ],
     "standards": [
-      "vendor/bin/phpcs --standard=phpcs.ruleset.xml *.php ."
+      "vendor/bin/phpcs --standard=phpcs.ruleset.xml ."
     ]
   }
 }

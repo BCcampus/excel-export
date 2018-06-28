@@ -1,4 +1,6 @@
 # excel-export
+[![Build Status](https://travis-ci.com/BCcampus/excel-export.svg?branch=dev)](https://travis-ci.com/BCcampus/excel-export)
+
 Export your post, page, custom post type, and user data to Excel file format (.XLSX) 
 
 ## Description ##

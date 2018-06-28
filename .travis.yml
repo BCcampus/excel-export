@@ -1,0 +1,51 @@
+language: php
+php:
+- 7.0.29
+- 7.1
+sudo: required
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+branches:
+  only:
+  - dev
+  - "/\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/"
+env:
+- WP_VERSION=latest
+cache:
+  apt: true
+  directories:
+  - "$HOME/.composer/cache"
+  - node_modules
+  - vendor
+before_install:
+- sudo apt-get -qq update
+install:
+- composer install
+before_script:
+- if [[ ${TRAVIS_PHP_VERSION:0:3} != "7.1" ]] && php -v | grep -q 'Xdebug'; then phpenv
+  config-rm xdebug.ini; fi
+- bash bin/install-wp-tests.sh exex_test root '' localhost $WP_VERSION
+script:
+- vendor/bin/phpunit --configuration phpunit.xml
+before_deploy:
+- export TRAVIS_PROJECT_SLUG="$(basename $TRAVIS_BUILD_DIR)"
+- curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+- chmod +x wp-cli.phar
+- sudo mv wp-cli.phar /usr/local/bin/wp
+- wp package install wp-cli/dist-archive-command
+- composer install --no-dev --optimize-autoloader
+- cd ../
+- wp dist-archive $TRAVIS_PROJECT_SLUG $TRAVIS_BUILD_DIR/$TRAVIS_PROJECT_SLUG-$TRAVIS_TAG.zip
+- cd $TRAVIS_BUILD_DIR
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: OHLiDwZC2g3PwRVGRbqiLTl6x0q3eThwcM5Co/s3HLm0miOih+4cAhDz4roa6avmTl8zmRskvin0DI4AFU82BSRDorBqklffrP40LoQ3VnwMMvJiSRsy3H+WURCVSwyE9z9K6UyV350ySKNV4JT1Tkq+3+oKtvCGncRCEwLuqiK6bRk6r/2m6JDzN36WT7tYGbTLgTtF5qqkG7JERwqGmCx43UGAtAx64K/NgDpGBOmY/11nAYTgUBx9KxIoOGKtGqqNeJfmnFoRVZM1YCHzEWBu6AlIaPtTPiTmssnPTNEHAxb9/qvEbGjToxQzXOAc+x3OcLDbT+09G4aO+QzTum3GRKqsPi4QDggsHVsgWoELESMBfvUmhaWUAvReQFu3hti9PFGjz14VhCN8OYhcZhZIDYDmlWdhyveTsNLGTpaYYbGS2FupqkSnjNyU86Od72WElRdmVbRMZn17/hOTalWhNFUy1OnMz2dOTR6CqgFdZzkDElyHoysEAjVwJWX5b/EeG9I13k5TU7NyqMr0snWCZTpggUgROMjtLgcBwVYL05yXEApQUczF0yHHdomyidy2Fx9Sy8+uiuepiUA7QFQ3qdPg7QW8Y23MTN7++gkvGIZf+cKE8CSuIEwiE9EHIKLfKub+gZy5JDEpUJSMGZUGjryd4skBicdkzrlHjXs=
+  file: excel-export-$TRAVIS_TAG.zip
+  on:
+    tags: true
+    repo: BCcampus/excel-export
+    branch: dev

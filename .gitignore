@@ -1,9 +1,4 @@
 .DS_Store
 .idea
 node_modules/
-!vendor
-vendor/*
-!vendor/composer
-!vendor/autoload.php
-!vendor/phpoffice
-!vendor/psr
+vendor
