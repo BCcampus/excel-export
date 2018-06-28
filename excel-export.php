@@ -62,7 +62,9 @@ function excel_export_page() {
 	ob_end_clean();
 
 	// get the post types on this website
-	$args = [ 'public' => true ];
+	$args = [
+		'public' => true,
+	];
 
 	$output     = 'names';
 	$operator   = 'and';
@@ -124,7 +126,11 @@ function excel_export_users() {
 		// Get BuddyPress profile field ID's and names
 		if ( function_exists( 'bp_is_active' ) ) {
 
-			$profile_groups = \BP_XProfile_Group::get( [ 'fetch_fields' => true ] );
+			$profile_groups = \BP_XProfile_Group::get(
+				[
+					'fetch_fields' => true,
+				]
+			);
 
 			if ( ! empty( $profile_groups ) ) {
 				foreach ( $profile_groups as $profile_group ) {
@@ -162,7 +168,7 @@ function excel_export_users() {
 			}
 
 			// Add basic user data to appropriate column
-			$spreadsheet->setActiveSheetIndex(0);
+			$spreadsheet->setActiveSheetIndex( 0 );
 			$sheet->SetCellValue( 'A' . $cell_count . '', $id );
 			$sheet->SetCellValue( 'B' . $cell_count . '', $username );
 			$sheet->SetCellValue( 'C' . $cell_count . '', $email );
@@ -174,9 +180,11 @@ function excel_export_users() {
 			$column_letter = 'F';
 
 			// Get all the user meta into an array, run array_map to take only the first index of each result
-			$user_meta = array_map( function ( $a ) {
-				return $a[0];
-			}, get_user_meta( $user->ID ) );
+			$user_meta = array_map(
+				function ( $a ) {
+						return $a[0];
+				}, get_user_meta( $user->ID )
+			);
 
 			// remove session tokens value as a preventative security measure
 			if ( isset( $user_meta['session_tokens'] ) ) {
@@ -221,7 +229,7 @@ function excel_export_users() {
 		$column_letter = 'F';
 
 		// Set up column labels for basic user data
-		$spreadsheet->setActiveSheetIndex(0);
+		$spreadsheet->setActiveSheetIndex( 0 );
 		$sheet->SetCellValue( 'A1', esc_html__( 'User ID' ) );
 		$sheet->SetCellValue( 'B1', esc_html__( 'Username' ) );
 		$sheet->SetCellValue( 'C1', esc_html__( 'Email' ) );
@@ -236,33 +244,31 @@ function excel_export_users() {
 		}
 
 		// Set document properties
-		$spreadsheet->getProperties()->setCreator('')
-		            ->setLastModifiedBy('')
-		            ->setTitle('Users')
-		            ->setSubject('all users')
-		            ->setDescription('Export of all users')
-		            ->setKeywords('office 2007 users export')
-		            ->setCategory('user results file');
+		$spreadsheet->getProperties()->setCreator( '' )
+					->setLastModifiedBy( '' )
+					->setTitle( 'Users' )
+					->setSubject( 'all users' )
+					->setDescription( 'Export of all users' )
+					->setKeywords( 'office 2007 users export' )
+					->setCategory( 'user results file' );
 
 		// Rename sheet
-		$spreadsheet->getActiveSheet()->setTitle('Users');
+		$spreadsheet->getActiveSheet()->setTitle( 'Users' );
 
 		// Set active sheet index to the first sheet, so Excel opens this as the first sheet
-		$spreadsheet->setActiveSheetIndex(0);
+		$spreadsheet->setActiveSheetIndex( 0 );
 
-
-// Redirect output to a client’s web browser (Xls)
-header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment;filename="Users.Xlsx"');
-header('Cache-Control: max-age=0');
-// If you're serving to IE 9, then the following may be needed
-header('Cache-Control: max-age=1');
-
+		// Redirect output to a client’s web browser (Xls)
+		header( 'Content-Type: application/vnd.ms-excel' );
+		header( 'Content-Disposition: attachment;filename="Users.Xlsx"' );
+		header( 'Cache-Control: max-age=0' );
+		// If you're serving to IE 9, then the following may be needed
+		header( 'Cache-Control: max-age=1' );
 
 		// Save Excel file
-$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-$writer->save('php://output');
-exit;
+		$writer = IOFactory::createWriter( $spreadsheet, 'Xlsx' );
+		$writer->save( 'php://output' );
+		exit;
 	}
 }
 
@@ -340,7 +346,8 @@ function excel_export_posts() {
 				$notice = __( 'Excel Export: ' . $post_value . ' does not exist, please try a different post type.', 'excel-export' );
 			}
 			?>
-            <script type="text/javascript"><?php echo 'alert("' . $notice . '");'; ?></script><?php
+			<script type="text/javascript"><?php echo 'alert("' . $notice . '");'; ?></script>
+													  <?php
 		}
 	}
 }
