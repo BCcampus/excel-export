@@ -73,13 +73,13 @@ function excel_export_page() {
 	$post_types = get_post_types( $args, $output, $operator );
 
 	// page content
-	$html = '<form action="#post-export" method="post">';
+	$html  = '<form action="#post-export" method="post">';
 	$html .= '<p><h1>Excel Export<span class="dashicons dashicons-download"></span></h1></p>';
 	$html .= '<hr><p><h2>Export Post Types</h2><p>The following post types were found on your website: </p>';
 	$html .= '<select id="excel_export_users" name="export_posts" />';
 	// let's populate the select list from the post types available on this website
 	foreach ( $post_types as $post_type ) {
-		$html .= '<option value="' . esc_attr__( $post_type ) . '">' . esc_attr__( $post_type ) . '</option>';
+		$html .= '<option value="' . esc_attr( $post_type ) . '">' . esc_attr( $post_type ) . '</option>';
 	}
 	// post export button
 	$html .= '</select><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_posts_submit" name="export_posts_submit" value="Export" /></p>';
@@ -91,7 +91,7 @@ function excel_export_page() {
 	// user export button
 	$html = '<form action="#user-export" method="post">';
 	// user export nonce
-	$html .= '<hr><p><h2>Export Users</h2></p>There are <u>' . esc_attr__( $user_count['total_users'] ) . '</u> users in total:' . esc_attr__( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
+	$html .= '<hr><p><h2>Export Users</h2></p>There are <u>' . esc_attr( $user_count['total_users'] ) . '</u> users in total:' . esc_attr( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
 	$html .= wp_nonce_field( 'export_button_users', 'submit_export_users' );
 	$html .= '</form>';
 	echo $html;
@@ -107,7 +107,7 @@ function excel_export_users() {
 
 		// Create a new spreadsheet
 		$spreadsheet = new Spreadsheet();
-		$sheet = $spreadsheet->getActiveSheet();
+		$sheet       = $spreadsheet->getActiveSheet();
 
 		// Args for the user query
 		$args = [
@@ -199,7 +199,7 @@ function excel_export_users() {
 			// Add each user meta to appropriate excel column
 			foreach ( $all_meta as $meta ) {
 				$column_letter ++;
-				$meta_value = unserialize( $meta ); // attempt to unserialize for readability
+				$meta_value = maybe_unserialize( $meta ); // attempt to unserialize for readability
 				if ( ! $meta_value ) { // if unserialize() returns false, just get the meta value
 					$meta_value = $meta; // get the meta value
 				} else { // let's get the unserialized meta values
@@ -317,12 +317,12 @@ function excel_export_posts() {
 			$blogtime = current_time( '--M-D-Y--H-I-s' );
 
 			// Set document properties
-			$sheet->getProperties()->setTitle( esc_html__( $post_type_requested ) );
-			$sheet->getProperties()->setSubject( esc_html__( 'all ' . $post_type_requested ) );
-			$sheet->getProperties()->setDescription( esc_html__( 'Export of all ' . $post_type_requested ) );
+			$sheet->getProperties()->setTitle( esc_html( $post_type_requested ) );
+			$sheet->getProperties()->setSubject( esc_html( 'all ' . $post_type_requested ) );
+			$sheet->getProperties()->setDescription( esc_html( 'Export of all ' . $post_type_requested ) );
 
 			// Rename sheet
-			$sheet->getActiveSheet()->setTitle( esc_html__( $post_type_requested ) );
+			$sheet->getActiveSheet()->setTitle( esc_html( $post_type_requested ) );
 
 			// Rename file
 			header( 'Content-Disposition: attachment;filename="' . $post_type_requested . $blogtime . '.xlsx"' );
@@ -345,11 +345,11 @@ function excel_export_posts() {
 			if ( $post_value === '' ) {
 				$notice = __( 'Export Error: Please select a post type to export it.', 'excel-export' );
 			} else {
-				$notice = __( 'Excel Export: ' . $post_value . ' does not exist, please try a different post type.', 'excel-export' );
+				$notice = 'Excel Export: ' . $post_value . ' does not exist, please try a different post type.';
 			}
 			?>
 			<script type="text/javascript"><?php echo 'alert("' . $notice . '");'; ?></script>
-													  <?php
+			<?php
 		}
 	}
 }
