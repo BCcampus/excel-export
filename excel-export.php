@@ -170,12 +170,12 @@ function excel_export_users() {
 
 			// Add basic user data to appropriate column
 			$spreadsheet->setActiveSheetIndex( 0 )
-			->SetCellValue( 'A' . $cell_count . '', $id )
-			->SetCellValue( 'B' . $cell_count . '', $username )
-			->SetCellValue( 'C' . $cell_count . '', $email )
-			->SetCellValue( 'D' . $cell_count . '', $url )
-			->SetCellValue( 'E' . $cell_count . '', $registered )
-			->SetCellValue( 'F' . $cell_count . '', $display_name );
+			->SetCellValue( 'A' . $cell_count, $id )
+			->SetCellValue( 'B' . $cell_count, $username )
+			->SetCellValue( 'C' . $cell_count, $email )
+			->SetCellValue( 'D' . $cell_count, $url )
+			->SetCellValue( 'E' . $cell_count, $registered )
+			->SetCellValue( 'F' . $cell_count, $display_name );
 
 			// Offset column letter, A-G reserved for basic user data
 			$column_letter = 'F';
