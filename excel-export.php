@@ -107,7 +107,6 @@ function excel_export_users() {
 
 		// Create a new spreadsheet
 		$spreadsheet = new Spreadsheet();
-		$sheet       = $spreadsheet->getActiveSheet();
 
 		// Args for the user query
 		$args = [
@@ -170,13 +169,13 @@ function excel_export_users() {
 			}
 
 			// Add basic user data to appropriate column
-			$spreadsheet->setActiveSheetIndex( 0 );
-			$sheet->SetCellValue( 'A' . $cell_count . '', $id );
-			$sheet->SetCellValue( 'B' . $cell_count . '', $username );
-			$sheet->SetCellValue( 'C' . $cell_count . '', $email );
-			$sheet->SetCellValue( 'D' . $cell_count . '', $url );
-			$sheet->SetCellValue( 'E' . $cell_count . '', $registered );
-			$sheet->SetCellValue( 'F' . $cell_count . '', $display_name );
+			$spreadsheet->setActiveSheetIndex( 0 )
+			->SetCellValue( 'A' . $cell_count . '', $id )
+			->SetCellValue( 'B' . $cell_count . '', $username )
+			->SetCellValue( 'C' . $cell_count . '', $email )
+			->SetCellValue( 'D' . $cell_count . '', $url )
+			->SetCellValue( 'E' . $cell_count . '', $registered )
+			->SetCellValue( 'F' . $cell_count . '', $display_name );
 
 			// Offset column letter, A-G reserved for basic user data
 			$column_letter = 'F';
@@ -209,7 +208,8 @@ function excel_export_users() {
 					}
 					$meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
 				}
-				$sheet->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
+				$spreadsheet->setActiveSheetIndex(0)
+				->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
 			}
 		}
 
@@ -231,18 +231,19 @@ function excel_export_users() {
 		$column_letter = 'F';
 
 		// Set up column labels for basic user data
-		$spreadsheet->setActiveSheetIndex( 0 );
-		$sheet->SetCellValue( 'A1', esc_html__( 'User ID' ) );
-		$sheet->SetCellValue( 'B1', esc_html__( 'Username' ) );
-		$sheet->SetCellValue( 'C1', esc_html__( 'Email' ) );
-		$sheet->SetCellValue( 'D1', esc_html__( 'URL' ) );
-		$sheet->SetCellValue( 'E1', esc_html__( 'Registration Date' ) );
-		$sheet->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
+		$spreadsheet->setActiveSheetIndex( 0 )
+		->SetCellValue( 'A1', esc_html__( 'User ID' ) )
+		->SetCellValue( 'B1', esc_html__( 'Username' ) )
+		->SetCellValue( 'C1', esc_html__( 'Email' ) )
+		->SetCellValue( 'D1', esc_html__( 'URL' ) )
+		->SetCellValue( 'E1', esc_html__( 'Registration Date' ) )
+		->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
 
 		// Set up column labels for user meta
 		foreach ( $all_meta_labels as $field ) {
 			$column_letter ++;
-			$sheet->SetCellValue( $column_letter . '1', $field );
+			$spreadsheet->setActiveSheetIndex(0)
+			->SetCellValue( $column_letter . '1', $field );
 		}
 
 		// Set document properties
@@ -260,12 +261,12 @@ function excel_export_users() {
 		// Set active sheet index to the first sheet, so Excel opens this as the first sheet
 		$spreadsheet->setActiveSheetIndex( 0 );
 
-		// Redirect output to a client’s web browser (Xls)
-		header( 'Content-Type: application/vnd.ms-excel' );
-		header( 'Content-Disposition: attachment;filename="Users.Xlsx"' );
-		header( 'Cache-Control: max-age=0' );
-		// If you're serving to IE 9, then the following may be needed
-		header( 'Cache-Control: max-age=1' );
+    // Redirect output to a client’s web browser (Xlsx)
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition: attachment;filename="Users.xlsx"');
+		header('Cache-Control: max-age=0');
+    // If you're serving to IE 9, then the following may be needed
+		header('Cache-Control: max-age=1');
 
 		// Save Excel file
 		$writer = IOFactory::createWriter( $spreadsheet, 'Xlsx' );
@@ -283,7 +284,7 @@ function excel_export_posts() {
 	if ( ! empty( $_POST ) && isset( $_POST['export_posts'] ) && check_admin_referer( 'export_button_posts', 'submit_export_posts' ) ) {
 
 		// Create a new PHPExcel object
-		$sheet = new Spreadsheet();
+		$spreadsheet = new Spreadsheet();
 
 		$post_type_requested = $_POST['export_posts'];
 
@@ -307,8 +308,9 @@ function excel_export_posts() {
 				foreach ( $value as $key => $val ) {
 					$post_value = $val; // get the meta value
 					$post_key   = $key; // get the key value for label
-					$sheet->getActiveSheet()->SetCellValue( $column_letter . '1', $post_key ); // Set up column labels
-					$sheet->getActiveSheet()->SetCellValue( $column_letter . '2', $post_value ); // add meta value to the right column and cell
+					$spreadsheet->setActiveSheetIndex(0)
+					            ->SetCellValue( $column_letter . '1', $post_key ) // Set up column labels
+					            ->SetCellValue( $column_letter . '2', $post_value ); // add meta value to the right column and cell
 					$column_letter ++; // increment column letter
 				}
 			}
@@ -317,26 +319,26 @@ function excel_export_posts() {
 			$blogtime = current_time( '--M-D-Y--H-I-s' );
 
 			// Set document properties
-			$sheet->getProperties()->setTitle( esc_html( $post_type_requested ) );
-			$sheet->getProperties()->setSubject( esc_html( 'all ' . $post_type_requested ) );
-			$sheet->getProperties()->setDescription( esc_html( 'Export of all ' . $post_type_requested ) );
+			$spreadsheet->getProperties()->setTitle( esc_html( $post_type_requested ) );
+			$spreadsheet->getProperties()->setSubject( esc_html( 'all ' . $post_type_requested ) );
+			$spreadsheet->getProperties()->setDescription( esc_html( 'Export of all ' . $post_type_requested ) );
 
 			// Rename sheet
-			$sheet->getActiveSheet()->setTitle( esc_html( $post_type_requested ) );
+			$spreadsheet->getActiveSheet()->setTitle( esc_html( $post_type_requested ) );
 
 			// Rename file
 			header( 'Content-Disposition: attachment;filename="' . $post_type_requested . $blogtime . '.xlsx"' );
 
 			// Set column data auto width
 			for ( $col = 'A'; $col !== 'E'; $col ++ ) {
-				$sheet->getActiveSheet()->getColumnDimension( $col )->setAutoSize( true );
+				$spreadsheet->getActiveSheet()->getColumnDimension( $col )->setAutoSize( true );
 			}
 
 			header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
 			header( 'Cache-Control: max-age=0' );
 
 			// Save Excel file
-			$obj_writer = IOFactory::createWriter( $sheet, 'Xlsx' );
+			$obj_writer = IOFactory::createWriter( $spreadsheet, 'Xlsx' );
 			$obj_writer->save( 'php://output' );
 
 			exit();
