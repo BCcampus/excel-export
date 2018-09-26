@@ -300,15 +300,16 @@ function excel_export_posts() {
 			// post query
 			$posts = get_posts( $args );
 
-			// Set initial column letter
-			$column_letter = 'A';
-
 			// Initial count for rows
 			$count = 1;
 
 			// Get the data we want from each post
 			foreach ( $posts as $single ) {
+				// Set initial column letter
+				$column_letter = 'A';
+
 				$count ++;
+
 				foreach ( $single as $meta ) {
 					$post_labels = [];
 					$post_values = [];
