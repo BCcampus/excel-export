@@ -208,7 +208,7 @@ function excel_export_users() {
 					}
 					$meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
 				}
-				$spreadsheet->setActiveSheetIndex(0)
+				$spreadsheet->setActiveSheetIndex( 0 )
 				->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
 			}
 		}
@@ -242,7 +242,7 @@ function excel_export_users() {
 		// Set up column labels for user meta
 		foreach ( $all_meta_labels as $field ) {
 			$column_letter ++;
-			$spreadsheet->setActiveSheetIndex(0)
+			$spreadsheet->setActiveSheetIndex( 0 )
 			->SetCellValue( $column_letter . '1', $field );
 		}
 
@@ -261,12 +261,12 @@ function excel_export_users() {
 		// Set active sheet index to the first sheet, so Excel opens this as the first sheet
 		$spreadsheet->setActiveSheetIndex( 0 );
 
-    // Redirect output to a client’s web browser (Xlsx)
-		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="Users.xlsx"');
-		header('Cache-Control: max-age=0');
-    // If you're serving to IE 9, then the following may be needed
-		header('Cache-Control: max-age=1');
+		// Redirect output to a client’s web browser (Xlsx)
+		header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
+		header( 'Content-Disposition: attachment;filename="Users.xlsx"' );
+		header( 'Cache-Control: max-age=0' );
+		// If you're serving to IE 9, then the following may be needed
+		header( 'Cache-Control: max-age=1' );
 
 		// Save Excel file
 		$writer = IOFactory::createWriter( $spreadsheet, 'Xlsx' );
@@ -321,7 +321,7 @@ function excel_export_posts() {
 				// Set up column values for post meta
 				foreach ( $post_values as $val ) {
 					$spreadsheet->setActiveSheetIndex( 0 )
-					            ->SetCellValue( $column_letter . $count, $val );
+								->SetCellValue( $column_letter . $count, $val );
 					$column_letter++;
 				}
 			}
@@ -331,7 +331,7 @@ function excel_export_posts() {
 			// Set up column labels for post meta
 			foreach ( $post_labels as $label ) {
 				$spreadsheet->setActiveSheetIndex( 0 )
-				            ->SetCellValue( $column_letter . '1', esc_html__( $label ) );
+							->SetCellValue( $column_letter . '1', esc_html__( $label ) );
 				$column_letter++;
 			}
 
