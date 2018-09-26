@@ -184,7 +184,7 @@ function excel_export_users() {
 			$user_meta = array_map(
 				function ( $a ) {
 						return $a[0];
-				}, get_post( $user->ID )
+				}, get_user_meta( $user->ID )
 			);
 
 			// remove session tokens value as a preventative security measure
