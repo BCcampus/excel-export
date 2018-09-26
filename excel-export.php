@@ -184,7 +184,7 @@ function excel_export_users() {
 			$user_meta = array_map(
 				function ( $a ) {
 						return $a[0];
-				}, get_user_meta( $user->ID )
+				}, get_post( $user->ID )
 			);
 
 			// remove session tokens value as a preventative security measure
@@ -300,19 +300,38 @@ function excel_export_posts() {
 			// post query
 			$posts = get_posts( $args );
 
-			// Set column letter
+			// Set initial column letter
 			$column_letter = 'A';
 
+			// Initial count for rows
+			$count = 1;
+
 			// Get the data we want from each post
-			foreach ( $posts as $value ) {
-				foreach ( $value as $key => $val ) {
-					$post_value = $val; // get the meta value
-					$post_key   = $key; // get the key value for label
-					$spreadsheet->setActiveSheetIndex(0)
-					            ->SetCellValue( $column_letter . '1', $post_key ) // Set up column labels
-					            ->SetCellValue( $column_letter . '2', $post_value ); // add meta value to the right column and cell
-					$column_letter ++; // increment column letter
+			foreach ( $posts as $single ) {
+				$count ++;
+				foreach ( $single as $meta ) {
+					$post_labels = [];
+					$post_values = [];
+					foreach ( $single as $key => $value ) {
+						$post_labels[] = $key;
+						$post_values[] = $value;
+					}
 				}
+				// Set up column values for post meta
+				foreach ( $post_values as $val ) {
+					$spreadsheet->setActiveSheetIndex( 0 )
+					            ->SetCellValue( $column_letter . $count, $val );
+					$column_letter++;
+				}
+			}
+
+			// Reset the column letter
+			$column_letter = 'A';
+			// Set up column labels for post meta
+			foreach ( $post_labels as $label ) {
+				$spreadsheet->setActiveSheetIndex( 0 )
+				            ->SetCellValue( $column_letter . '1', esc_html__( $label ) );
+				$column_letter++;
 			}
 
 			// current blog time for the export name
