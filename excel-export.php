@@ -157,6 +157,7 @@ function excel_export_users() {
 			$url          = $user_info->user_url;
 			$registered   = $user_info->user_registered;
 			$display_name = $user_info->display_name;
+			$roles = implode(', ', $user_info->roles);
 
 			if ( function_exists( 'bp_is_active' ) ) {
 				// Get the BP data for this user
@@ -170,12 +171,13 @@ function excel_export_users() {
 
 			// Add basic user data to appropriate column
 			$spreadsheet->setActiveSheetIndex( 0 )
-			->SetCellValue( 'A' . $cell_count, $id )
-			->SetCellValue( 'B' . $cell_count, $username )
-			->SetCellValue( 'C' . $cell_count, $email )
-			->SetCellValue( 'D' . $cell_count, $url )
-			->SetCellValue( 'E' . $cell_count, $registered )
-			->SetCellValue( 'F' . $cell_count, $display_name );
+			            ->SetCellValue( 'A' . $cell_count, $id )
+			            ->SetCellValue( 'B' . $cell_count, $username )
+			            ->SetCellValue( 'C' . $cell_count, $email )
+			            ->SetCellValue( 'D' . $cell_count, $url )
+			            ->SetCellValue( 'E' . $cell_count, $registered )
+			            ->SetCellValue( 'F' . $cell_count, $display_name )
+			            ->SetCellValue( 'G' . $cell_count, $roles );
 
 			// Offset column letter, A-G reserved for basic user data
 			$column_letter = 'F';
@@ -183,7 +185,7 @@ function excel_export_users() {
 			// Get all the user meta into an array, run array_map to take only the first index of each result
 			$user_meta = array_map(
 				function ( $a ) {
-						return $a[0];
+					return $a[0];
 				}, get_user_meta( $user->ID )
 			);
 
@@ -192,28 +194,30 @@ function excel_export_users() {
 				unset( $user_meta['session_tokens'] );
 			}
 
-			// Merge with the BuddyPress data if any
-			$all_meta = array_merge( $user_meta, $bp_field_data );
-
-			// Add each user meta to appropriate excel column
-			foreach ( $user_meta as $meta ) {
-				$column_letter ++;
-				$meta_value = is_serialized( $meta ); // check if it's serialized
-				if (! $meta_value ) { // if unserialize() returns false, just get the meta value
-					$meta_value = $meta; // get the meta value
-				} else { // otherwise let's unserialized  the meta values
-					$meta_value = maybe_unserialize($meta);
-				    $unserialized = [];
-					foreach ( $meta_value as $key => $value ) {
-						$unserialized[] = $key . ':' . $value;  // separate with a colon for readability
-					}
-					$meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
-				}
-				$spreadsheet->setActiveSheetIndex( 0 )
-				->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
-			}
+			// todo: find a way to add/map the data correctly regardless of what columns a user has
+			/**
+			 * // Merge with the BuddyPress data if any
+			 * $all_meta = array_merge( $user_meta, $bp_field_data );
+			 *
+			 * // Add each user meta to appropriate excel column
+			 * foreach ( $all_meta as $meta ) {
+			 * $column_letter ++;
+			 * $meta_value = is_serialized( $meta ); // check if it's serialized
+			 * if (! $meta_value ) { // if unserialize() returns false, just get the meta value
+			 * $meta_value = $meta; // get the meta value
+			 * } else { // otherwise let's unserialized  the meta values
+			 * $meta_value = maybe_unserialize($meta);
+			 * $unserialized = [];
+			 * foreach ( $meta_value as $key => $value ) {
+			 * $unserialized[] = $key . ':' . $value;  // separate with a colon for readability
+			 * }
+			 * $meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
+			 * }
+			 * $spreadsheet->setActiveSheetIndex( 0 )
+			 * ->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
+			 * }
+			 */
 		}
-
 		// get column labels, user_id 1 as a placeholder for all fields
 		$user_meta = get_user_meta( 1 );
 
@@ -238,14 +242,18 @@ function excel_export_users() {
 		->SetCellValue( 'C1', esc_html__( 'Email' ) )
 		->SetCellValue( 'D1', esc_html__( 'URL' ) )
 		->SetCellValue( 'E1', esc_html__( 'Registration Date' ) )
-		->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
+		->SetCellValue( 'F1', esc_html__( 'Display Name' ) )
+		->SetCellValue( 'G1', esc_html__( 'Roles' ) );
 
 		// Set up column labels for user meta
-		foreach ( $user_meta_fields as $field ) {
+        // todo: find a way to add/map the data correctly regardless of what columns a user has
+		/***
+		foreach ( $all_meta_labels as $field ) {
 			$column_letter ++;
 			$spreadsheet->setActiveSheetIndex( 0 )
 			->SetCellValue( $column_letter . '1', $field );
 		}
+        */
 
 		// Set document properties
 		$spreadsheet->getProperties()->setCreator( '' )
