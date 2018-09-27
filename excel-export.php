@@ -91,7 +91,8 @@ function excel_export_page() {
 	// user export button
 	$html = '<form action="#user-export" method="post">';
 	// user export nonce
-	$html .= '<hr><p><h2>Export Users</h2></p>There are <u>' . esc_attr( $user_count['total_users'] ) . '</u> users in total:' . esc_attr( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p><hr>';
+	$html .= '<hr><p><h2>Export Users</h2></p>There are <u>' . esc_attr( $user_count['total_users'] ) . '</u> users in total:' . esc_attr( $role_count ) . '. </p><input class="button button-primary export_button" style="margin-top:3px;" type="submit" id="excel_export_users" name="users_export" value="Export Users" /></p>';
+	$html .= '<input type="checkbox" name="consent" value="1"> Include personally identifiable information in export<hr>';
 	$html .= wp_nonce_field( 'export_button_users', 'submit_export_users' );
 	$html .= '</form>';
 	echo $html;
@@ -145,6 +146,9 @@ function excel_export_users() {
 			}
 		}
 
+		// don't include personally identifiable information in export by default
+		( isset( $_POST['users_export'] ) ) ? $consent = $_POST['consent'] : $consent = '0';
+
 		// Get User Data and Meta for each user
 		foreach ( $wp_users as $user ) {
 			$cell_count ++;
@@ -153,15 +157,15 @@ function excel_export_users() {
 			$user_info    = get_userdata( $user->ID );
 			$id           = $user_info->ID;
 			$username     = $user_info->user_login;
-			$first_name = $user_info->first_name;
-			$last_name = $user_info->last_name;
-			$email        = $user_info->user_email;
+			$display_name = ( $consent === '1' ) ? $user_info->display_name : '';
+			$first_name   = ( $consent === '1' ) ? $user_info->first_name : '';
+			$last_name    = ( $consent === '1' ) ? $user_info->last_name : '';
+			$email        = ( $consent === '1' ) ? $user_info->user_email : '';
 			$url          = $user_info->user_url;
 			$registered   = $user_info->user_registered;
-			$display_name = $user_info->display_name;
-			$roles = implode(', ', $user_info->roles);
-			$user_level = $user_info->user_level;
-			$user_status= $user_info->user_status;
+			$roles        = implode( ', ', $user_info->roles );
+			$user_level   = $user_info->user_level;
+			$user_status  = $user_info->user_status;
 
 			if ( function_exists( 'bp_is_active' ) ) {
 				// Get the BP data for this user
@@ -177,12 +181,12 @@ function excel_export_users() {
 			$spreadsheet->setActiveSheetIndex( 0 )
 			            ->SetCellValue( 'A' . $cell_count, $id )
 			            ->SetCellValue( 'B' . $cell_count, $username )
-				        ->SetCellValue( 'C' . $cell_count, $first_name )
-				        ->SetCellValue( 'D' . $cell_count, $last_name )
-			            ->SetCellValue( 'E' . $cell_count, $email )
-			            ->SetCellValue( 'F' . $cell_count, $url )
-			            ->SetCellValue( 'G' . $cell_count, $registered )
-			            ->SetCellValue( 'H' . $cell_count, $display_name )
+				        ->SetCellValue( 'C' . $cell_count, $display_name )
+				        ->SetCellValue( 'D' . $cell_count, $first_name )
+				        ->SetCellValue( 'E' . $cell_count, $last_name )
+			            ->SetCellValue( 'F' . $cell_count, $email )
+			            ->SetCellValue( 'G' . $cell_count, $url )
+			            ->SetCellValue( 'H' . $cell_count, $registered )
 			            ->SetCellValue( 'I' . $cell_count, $roles )
 				        ->SetCellValue( 'J' . $cell_count, $user_level )
 				        ->SetCellValue( 'K' . $cell_count, $user_status );
@@ -247,12 +251,12 @@ function excel_export_users() {
 		$spreadsheet->setActiveSheetIndex( 0 )
 		->SetCellValue( 'A1', esc_html__( 'User ID' ) )
 		->SetCellValue( 'B1', esc_html__( 'Username' ) )
-        ->SetCellValue( 'C1', esc_html__( 'First Name' ) )
-        ->SetCellValue( 'D1', esc_html__( 'Last Name' ) )
-		->SetCellValue( 'E1', esc_html__( 'Email' ) )
-		->SetCellValue( 'F1', esc_html__( 'URL' ) )
-		->SetCellValue( 'G1', esc_html__( 'Registration Date' ) )
-		->SetCellValue( 'H1', esc_html__( 'Display Name' ) )
+        ->SetCellValue( 'C1', esc_html__( 'Display Name' ) )
+        ->SetCellValue( 'D1', esc_html__( 'First Name' ) )
+        ->SetCellValue( 'E1', esc_html__( 'Last Name' ) )
+		->SetCellValue( 'F1', esc_html__( 'Email' ) )
+		->SetCellValue( 'G1', esc_html__( 'URL' ) )
+		->SetCellValue( 'H1', esc_html__( 'Registration Date' ) )
 		->SetCellValue( 'I1', esc_html__( 'Roles' ) )
         ->SetCellValue( 'J1', esc_html__( 'User Level' ) )
         ->SetCellValue( 'K1', esc_html__( 'User Status' ) );
