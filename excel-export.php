@@ -276,6 +276,13 @@ function excel_export_users() {
 					->setKeywords( 'office 2007 users export' )
 					->setCategory( 'user results file' );
 
+		// auto size column width
+		foreach (range('A', $spreadsheet->getActiveSheet()->getHighestDataColumn()) as $col) {
+			$spreadsheet->getActiveSheet()
+			               ->getColumnDimension($col)
+			               ->setAutoSize(true);
+		}
+
 		// Rename sheet
 		$spreadsheet->getActiveSheet()->setTitle( 'Users' );
 
