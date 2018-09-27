@@ -153,11 +153,15 @@ function excel_export_users() {
 			$user_info    = get_userdata( $user->ID );
 			$id           = $user_info->ID;
 			$username     = $user_info->user_login;
+			$first_name = $user_info->first_name;
+			$last_name = $user_info->last_name;
 			$email        = $user_info->user_email;
 			$url          = $user_info->user_url;
 			$registered   = $user_info->user_registered;
 			$display_name = $user_info->display_name;
 			$roles = implode(', ', $user_info->roles);
+			$user_level = $user_info->user_level;
+			$user_status= $user_info->user_status;
 
 			if ( function_exists( 'bp_is_active' ) ) {
 				// Get the BP data for this user
@@ -173,14 +177,18 @@ function excel_export_users() {
 			$spreadsheet->setActiveSheetIndex( 0 )
 			            ->SetCellValue( 'A' . $cell_count, $id )
 			            ->SetCellValue( 'B' . $cell_count, $username )
-			            ->SetCellValue( 'C' . $cell_count, $email )
-			            ->SetCellValue( 'D' . $cell_count, $url )
-			            ->SetCellValue( 'E' . $cell_count, $registered )
-			            ->SetCellValue( 'F' . $cell_count, $display_name )
-			            ->SetCellValue( 'G' . $cell_count, $roles );
+				        ->SetCellValue( 'C' . $cell_count, $first_name )
+				        ->SetCellValue( 'D' . $cell_count, $last_name )
+			            ->SetCellValue( 'E' . $cell_count, $email )
+			            ->SetCellValue( 'F' . $cell_count, $url )
+			            ->SetCellValue( 'G' . $cell_count, $registered )
+			            ->SetCellValue( 'H' . $cell_count, $display_name )
+			            ->SetCellValue( 'I' . $cell_count, $roles )
+				        ->SetCellValue( 'J' . $cell_count, $user_level )
+				        ->SetCellValue( 'K' . $cell_count, $user_status );
 
 			// Offset column letter, A-G reserved for basic user data
-			$column_letter = 'F';
+			$column_letter = 'K';
 
 			// Get all the user meta into an array, run array_map to take only the first index of each result
 			$user_meta = array_map(
@@ -233,17 +241,21 @@ function excel_export_users() {
 		$all_meta_labels = array_merge( $user_meta_fields, $bp_field_names );
 
 		// Reset column letter offset, A-G reserved for basic user data
-		$column_letter = 'F';
+		$column_letter = 'K';
 
 		// Set up column labels for basic user data
 		$spreadsheet->setActiveSheetIndex( 0 )
 		->SetCellValue( 'A1', esc_html__( 'User ID' ) )
 		->SetCellValue( 'B1', esc_html__( 'Username' ) )
-		->SetCellValue( 'C1', esc_html__( 'Email' ) )
-		->SetCellValue( 'D1', esc_html__( 'URL' ) )
-		->SetCellValue( 'E1', esc_html__( 'Registration Date' ) )
-		->SetCellValue( 'F1', esc_html__( 'Display Name' ) )
-		->SetCellValue( 'G1', esc_html__( 'Roles' ) );
+        ->SetCellValue( 'C1', esc_html__( 'First Name' ) )
+        ->SetCellValue( 'D1', esc_html__( 'Last Name' ) )
+		->SetCellValue( 'E1', esc_html__( 'Email' ) )
+		->SetCellValue( 'F1', esc_html__( 'URL' ) )
+		->SetCellValue( 'G1', esc_html__( 'Registration Date' ) )
+		->SetCellValue( 'H1', esc_html__( 'Display Name' ) )
+		->SetCellValue( 'I1', esc_html__( 'Roles' ) )
+        ->SetCellValue( 'J1', esc_html__( 'User Level' ) )
+        ->SetCellValue( 'K1', esc_html__( 'User Status' ) );
 
 		// Set up column labels for user meta
         // todo: find a way to add/map the data correctly regardless of what columns a user has
