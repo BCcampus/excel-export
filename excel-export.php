@@ -196,7 +196,7 @@ function excel_export_users() {
 			$all_meta = array_merge( $user_meta, $bp_field_data );
 
 			// Add each user meta to appropriate excel column
-			foreach ( $all_meta as $meta ) {
+			foreach ( $user_meta as $meta ) {
 				$column_letter ++;
 				$meta_value = is_serialized( $meta ); // check if it's serialized
 				if (! $meta_value ) { // if unserialize() returns false, just get the meta value
@@ -241,7 +241,7 @@ function excel_export_users() {
 		->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
 
 		// Set up column labels for user meta
-		foreach ( $all_meta_labels as $field ) {
+		foreach ( $user_meta_fields as $field ) {
 			$column_letter ++;
 			$spreadsheet->setActiveSheetIndex( 0 )
 			->SetCellValue( $column_letter . '1', $field );
