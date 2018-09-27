@@ -193,16 +193,17 @@ function excel_export_users() {
 			}
 
 			// Merge with the BuddyPress data if any
-			$all_meta = array_merge( $user_meta, $bp_field_data );
+			//$all_meta = array_merge( $user_meta, $bp_field_data );
 
 			// Add each user meta to appropriate excel column
-			foreach ( $all_meta as $meta ) {
+			foreach ( $user_meta as $meta ) {
 				$column_letter ++;
-				$meta_value = maybe_unserialize( $meta ); // attempt to unserialize for readability
-				if ( ! $meta_value ) { // if unserialize() returns false, just get the meta value
+				$meta_value = is_serialized( $meta ); // check if it's serialized
+				if (! $meta_value ) { // if unserialize() returns false, just get the meta value
 					$meta_value = $meta; // get the meta value
-				} else { // let's get the unserialized meta values
-					$unserialized = [];
+				} else { // otherwise let's unserialized  the meta values
+					$meta_value = maybe_unserialize($meta);
+				    $unserialized = [];
 					foreach ( $meta_value as $key => $value ) {
 						$unserialized[] = $key . ':' . $value;  // separate with a colon for readability
 					}
@@ -225,7 +226,7 @@ function excel_export_users() {
 		$user_meta_fields = array_keys( $user_meta );
 
 		// Merge with BuddyPress labels if any
-		$all_meta_labels = array_merge( $user_meta_fields, $bp_field_names );
+		//$all_meta_labels = array_merge( $user_meta_fields, $bp_field_names );
 
 		// Reset column letter offset, A-G reserved for basic user data
 		$column_letter = 'F';
@@ -240,7 +241,7 @@ function excel_export_users() {
 		->SetCellValue( 'F1', esc_html__( 'Display Name' ) );
 
 		// Set up column labels for user meta
-		foreach ( $all_meta_labels as $field ) {
+		foreach ( $user_meta_fields as $field ) {
 			$column_letter ++;
 			$spreadsheet->setActiveSheetIndex( 0 )
 			->SetCellValue( $column_letter . '1', $field );
