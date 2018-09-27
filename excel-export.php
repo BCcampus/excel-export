@@ -198,8 +198,19 @@ function excel_export_users() {
 			// Add each user meta to appropriate excel column
 			foreach ( $all_meta as $meta ) {
 				$column_letter ++;
+				$meta_value = is_serialized( $meta ); // check if it's serialized
+				if (! $meta_value ) { // if unserialize() returns false, just get the meta value
+					$meta_value = $meta; // get the meta value
+				} else { // otherwise let's unserialized  the meta values
+					$meta_value = maybe_unserialize($meta);
+				    $unserialized = [];
+					foreach ( $meta_value as $key => $value ) {
+						$unserialized[] = $key . ':' . $value;  // separate with a colon for readability
+					}
+					$meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
+				}
 				$spreadsheet->setActiveSheetIndex( 0 )
-				->SetCellValue( $column_letter . $cell_count, $meta ); // add meta value to the right column and cell
+				->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
 			}
 		}
 
