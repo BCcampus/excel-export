@@ -179,17 +179,17 @@ function excel_export_users() {
 
 			// Add basic user data to appropriate column
 			$spreadsheet->setActiveSheetIndex( 0 )
-			            ->SetCellValue( 'A' . $cell_count, $id )
-			            ->SetCellValue( 'B' . $cell_count, $username )
-				        ->SetCellValue( 'C' . $cell_count, $display_name )
-				        ->SetCellValue( 'D' . $cell_count, $first_name )
-				        ->SetCellValue( 'E' . $cell_count, $last_name )
-			            ->SetCellValue( 'F' . $cell_count, $email )
-			            ->SetCellValue( 'G' . $cell_count, $url )
-			            ->SetCellValue( 'H' . $cell_count, $registered )
-			            ->SetCellValue( 'I' . $cell_count, $roles )
-				        ->SetCellValue( 'J' . $cell_count, $user_level )
-				        ->SetCellValue( 'K' . $cell_count, $user_status );
+						->SetCellValue( 'A' . $cell_count, $id )
+						->SetCellValue( 'B' . $cell_count, $username )
+						->SetCellValue( 'C' . $cell_count, $display_name )
+						->SetCellValue( 'D' . $cell_count, $first_name )
+						->SetCellValue( 'E' . $cell_count, $last_name )
+						->SetCellValue( 'F' . $cell_count, $email )
+						->SetCellValue( 'G' . $cell_count, $url )
+						->SetCellValue( 'H' . $cell_count, $registered )
+						->SetCellValue( 'I' . $cell_count, $roles )
+						->SetCellValue( 'J' . $cell_count, $user_level )
+						->SetCellValue( 'K' . $cell_count, $user_status );
 
 			// Offset column letter, A-G reserved for basic user data
 			$column_letter = 'K';
@@ -251,25 +251,25 @@ function excel_export_users() {
 		$spreadsheet->setActiveSheetIndex( 0 )
 		->SetCellValue( 'A1', esc_html__( 'User ID' ) )
 		->SetCellValue( 'B1', esc_html__( 'Username' ) )
-        ->SetCellValue( 'C1', esc_html__( 'Display Name' ) )
-        ->SetCellValue( 'D1', esc_html__( 'First Name' ) )
-        ->SetCellValue( 'E1', esc_html__( 'Last Name' ) )
+		->SetCellValue( 'C1', esc_html__( 'Display Name' ) )
+		->SetCellValue( 'D1', esc_html__( 'First Name' ) )
+		->SetCellValue( 'E1', esc_html__( 'Last Name' ) )
 		->SetCellValue( 'F1', esc_html__( 'Email' ) )
 		->SetCellValue( 'G1', esc_html__( 'URL' ) )
 		->SetCellValue( 'H1', esc_html__( 'Registration Date' ) )
 		->SetCellValue( 'I1', esc_html__( 'Roles' ) )
-        ->SetCellValue( 'J1', esc_html__( 'User Level' ) )
-        ->SetCellValue( 'K1', esc_html__( 'User Status' ) );
+		->SetCellValue( 'J1', esc_html__( 'User Level' ) )
+		->SetCellValue( 'K1', esc_html__( 'User Status' ) );
 
 		// Set up column labels for user meta
-        // todo: find a way to add/map the data correctly regardless of what columns a user has
+		// todo: find a way to add/map the data correctly regardless of what columns a user has
 		/***
 		foreach ( $all_meta_labels as $field ) {
 			$column_letter ++;
 			$spreadsheet->setActiveSheetIndex( 0 )
 			->SetCellValue( $column_letter . '1', $field );
 		}
-        */
+		*/
 
 		// Set document properties
 		$spreadsheet->getProperties()->setCreator( '' )
@@ -281,10 +281,10 @@ function excel_export_users() {
 					->setCategory( 'user results file' );
 
 		// auto size column width
-		foreach (range('A', $spreadsheet->getActiveSheet()->getHighestDataColumn()) as $col) {
+		foreach ( range( 'A', $spreadsheet->getActiveSheet()->getHighestDataColumn() ) as $col ) {
 			$spreadsheet->getActiveSheet()
-			               ->getColumnDimension($col)
-			               ->setAutoSize(true);
+						   ->getColumnDimension( $col )
+						   ->setAutoSize( true );
 		}
 
 		// Rename sheet
