@@ -149,27 +149,52 @@ function excel_export_users() {
 		// don't include personally identifiable information in export by default
 		( isset( $_POST['users_export'] ) ) ? $consent = $_POST['consent'] : $consent = '0';
 
+		$cell_headers = [
+			'A' => 'User ID',
+			'B' => 'Username',
+			'C' => 'Display Name',
+			'D' => 'First Name',
+			'E' => 'Last Name',
+			'F' => 'Email',
+			'G' => 'URL',
+			'H' => 'Registration Date',
+			'I' => 'Roles',
+			'J' => 'User Level',
+			'K' => 'User Status',
+		];
+
+		apply_filters( 'excel_export_headers', $cell_headers );
+
+		// set csv headers
+		foreach ( $cell_headers as $k => $v ) {
+			$spreadsheet->setActiveSheetIndex( 0 )
+						->SetCellValue( $k . $cell_count, $v );
+		}
+
 		// Get User Data and Meta for each user
 		foreach ( $wp_users as $user ) {
 			$cell_count ++;
 
 			// Get basic user data
-			$user_info    = get_userdata( $user->ID );
-			$id           = $user_info->ID;
-			$username     = $user_info->user_login;
-			$display_name = ( $consent === '1' ) ? $user_info->display_name : '';
-			$first_name   = ( $consent === '1' ) ? $user_info->first_name : '';
-			$last_name    = ( $consent === '1' ) ? $user_info->last_name : '';
-			$email        = ( $consent === '1' ) ? $user_info->user_email : '';
-			$url          = $user_info->user_url;
-			$registered   = $user_info->user_registered;
-			$roles        = implode( ', ', $user_info->roles );
-			$user_level   = $user_info->user_level;
-			$user_status  = $user_info->user_status;
+			$user_info = get_userdata( $user->ID );
+
+			$basic = [
+				'A' => $user_info->ID,
+				'B' => $user_info->user_login,
+				'C' => ( $consent === '1' ) ? $user_info->display_name : '',
+				'D' => ( $consent === '1' ) ? $user_info->first_name : '',
+				'E' => ( $consent === '1' ) ? $user_info->last_name : '',
+				'F' => ( $consent === '1' ) ? $user_info->user_email : '',
+				'G' => $user_info->user_url,
+				'H' => $user_info->user_registered,
+				'I' => implode( ', ', $user_info->roles ),
+				'J' => $user_info->user_level,
+				'K' => $user_info->user_status,
+			];
 
 			if ( function_exists( 'bp_is_active' ) ) {
 				// Get the BP data for this user
-				$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $id, $bp_field_ids );
+				$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $user_info->ID, $bp_field_ids );
 
 				// Get the value of BP fields for this user
 				foreach ( $bp_get_data as $bp_field_value ) {
@@ -177,22 +202,11 @@ function excel_export_users() {
 				}
 			}
 
-			// Add basic user data to appropriate column
-			$spreadsheet->setActiveSheetIndex( 0 )
-						->SetCellValue( 'A' . $cell_count, $id )
-						->SetCellValue( 'B' . $cell_count, $username )
-						->SetCellValue( 'C' . $cell_count, $display_name )
-						->SetCellValue( 'D' . $cell_count, $first_name )
-						->SetCellValue( 'E' . $cell_count, $last_name )
-						->SetCellValue( 'F' . $cell_count, $email )
-						->SetCellValue( 'G' . $cell_count, $url )
-						->SetCellValue( 'H' . $cell_count, $registered )
-						->SetCellValue( 'I' . $cell_count, $roles )
-						->SetCellValue( 'J' . $cell_count, $user_level )
-						->SetCellValue( 'K' . $cell_count, $user_status );
-
-			// Offset column letter, A-G reserved for basic user data
-			$column_letter = 'K';
+			// set csv basic user data
+			foreach ( $basic as $k => $v ) {
+				$spreadsheet->setActiveSheetIndex( 0 )
+							->SetCellValue( $k . $cell_count, $v );
+			}
 
 			// Get all the user meta into an array, run array_map to take only the first index of each result
 			$user_meta = array_map(
@@ -247,29 +261,15 @@ function excel_export_users() {
 		// Reset column letter offset, A-G reserved for basic user data
 		$column_letter = 'K';
 
-		// Set up column labels for basic user data
-		$spreadsheet->setActiveSheetIndex( 0 )
-		->SetCellValue( 'A1', esc_html__( 'User ID' ) )
-		->SetCellValue( 'B1', esc_html__( 'Username' ) )
-		->SetCellValue( 'C1', esc_html__( 'Display Name' ) )
-		->SetCellValue( 'D1', esc_html__( 'First Name' ) )
-		->SetCellValue( 'E1', esc_html__( 'Last Name' ) )
-		->SetCellValue( 'F1', esc_html__( 'Email' ) )
-		->SetCellValue( 'G1', esc_html__( 'URL' ) )
-		->SetCellValue( 'H1', esc_html__( 'Registration Date' ) )
-		->SetCellValue( 'I1', esc_html__( 'Roles' ) )
-		->SetCellValue( 'J1', esc_html__( 'User Level' ) )
-		->SetCellValue( 'K1', esc_html__( 'User Status' ) );
-
 		// Set up column labels for user meta
 		// todo: find a way to add/map the data correctly regardless of what columns a user has
 		/***
-		foreach ( $all_meta_labels as $field ) {
-			$column_letter ++;
-			$spreadsheet->setActiveSheetIndex( 0 )
-			->SetCellValue( $column_letter . '1', $field );
-		}
-		*/
+		 * foreach ( $all_meta_labels as $field ) {
+		 * $column_letter ++;
+		 * $spreadsheet->setActiveSheetIndex( 0 )
+		 * ->SetCellValue( $column_letter . '1', $field );
+		 * }
+		 */
 
 		// Set document properties
 		$spreadsheet->getProperties()->setCreator( '' )
@@ -283,8 +283,8 @@ function excel_export_users() {
 		// auto size column width
 		foreach ( range( 'A', $spreadsheet->getActiveSheet()->getHighestDataColumn() ) as $col ) {
 			$spreadsheet->getActiveSheet()
-						   ->getColumnDimension( $col )
-						   ->setAutoSize( true );
+						->getColumnDimension( $col )
+						->setAutoSize( true );
 		}
 
 		// Rename sheet
@@ -354,7 +354,7 @@ function excel_export_posts() {
 				foreach ( $post_values as $val ) {
 					$spreadsheet->setActiveSheetIndex( 0 )
 								->SetCellValue( $column_letter . $count, $val );
-					$column_letter++;
+					$column_letter ++;
 				}
 			}
 
@@ -364,7 +364,7 @@ function excel_export_posts() {
 			foreach ( $post_labels as $label ) {
 				$spreadsheet->setActiveSheetIndex( 0 )
 							->SetCellValue( $column_letter . '1', esc_html__( $label ) );
-				$column_letter++;
+				$column_letter ++;
 			}
 
 			// current blog time for the export name
