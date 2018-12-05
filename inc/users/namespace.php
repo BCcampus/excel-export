@@ -6,9 +6,11 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
- * Gets and exports the user data
+ *
+ * @return string
+ * @throws \PhpOffice\PhpSpreadsheet\Exception
+ * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
  */
-
 function excel_export_users() {
 	// check if User data is being requested and nonce is valid
 	if ( ! empty( $_POST ) && isset( $_POST['users_export'] ) && check_admin_referer( 'export_button_users', 'submit_export_users' ) ) {
@@ -55,67 +57,61 @@ function excel_export_users() {
 
 		// don't include personally identifiable information in export by default
 		( isset( $_POST['users_export'] ) ) ? $consent = $_POST['consent'] : $consent = '0';
-
-		$basic_info = [
-			'ID' => 'User ID',
-			'user_login' => 'Username',
-			'display_name' => 'Display Name',
-			'first_name' => 'First Name',
-			'last_name' => 'Last Name',
-			'user_email' => 'Email',
-			'user_url' => 'URL',
+		$alphabet                                      = range( 'A', 'Z' );
+		$user_data                                     = [
+			'ID'              => 'User ID',
+			'user_login'      => 'Username',
+			'display_name'    => 'Display Name',
+			'first_name'      => 'First Name',
+			'last_name'       => 'Last Name',
+			'user_email'      => 'Email',
+			'user_url'        => 'URL',
 			'user_registered' => 'Registration Date',
-			'roles' => 'Roles',
-			'user_level' => 'User Level',
-			'user_status' => 'User Status',
+			'roles'           => 'Roles',
+			'user_level'      => 'User Level',
+			'user_status'     => 'User Status',
 		];
 
-		apply_filters( 'excel_export_headers', $basic_info );
+		// let developers hook in
+		apply_filters( 'excel_export_user_data', $user_data );
 
-		$cell_headers = [
-			'A' => 'User ID',
-			'B' => 'Username',
-			'C' => 'Display Name',
-			'D' => 'First Name',
-			'E' => 'Last Name',
-			'F' => 'Email',
-			'G' => 'URL',
-			'H' => 'Registration Date',
-			'I' => 'Roles',
-			'J' => 'User Level',
-			'K' => 'User Status',
-		];
+		// no metadata by default
+		$user_metadata = [];
 
-		// set csv headers
+		// let developers hook in
+		apply_filters( 'excel_export_user_metadata', $user_metadata );
+
+		// combine user and user_meta arrays
+		$combined = array_merge( $user_data, $user_metadata );
+
+		$num_columns = count( $combined );
+
+		// get keys for only what we need
+		$alpha_keys = array_splice( $alphabet, 0, $num_columns );
+
+		// create cell headers from the alpha keys and filtered values
+		$cell_headers = array_combine( $alpha_keys, array_values( $combined ) );
+
+		// set cell headers
 		foreach ( $cell_headers as $k => $v ) {
 			$spreadsheet->setActiveSheetIndex( 0 )
 						->SetCellValue( $k . $cell_count, $v );
 		}
 
-		// Get User Data and Meta for each user
+		/**
+		 * Get User data for each user
+		 */
 		foreach ( $wp_users as $user ) {
 			$cell_count ++;
 
-			// Get basic user data
-			$user_info = get_userdata( $user->ID );
+			// create dynamic array based on what we might expect to be held in the user database
+			$user_fields = array_combine( $alpha_keys, array_keys( $user_data ) );
 
-			$basic = [
-				'A' => $user_info->ID,
-				'B' => $user_info->user_login,
-				'C' => ( $consent === '1' ) ? $user_info->display_name : '',
-				'D' => ( $consent === '1' ) ? $user_info->first_name : '',
-				'E' => ( $consent === '1' ) ? $user_info->last_name : '',
-				'F' => ( $consent === '1' ) ? $user_info->user_email : '',
-				'G' => $user_info->user_url,
-				'H' => $user_info->user_registered,
-				'I' => implode( ', ', $user_info->roles ),
-				'J' => $user_info->user_level,
-				'K' => $user_info->user_status,
-			];
+			$user_content = get_from_users_table( $user->ID, $user_fields, $consent );
 
 			if ( function_exists( 'bp_is_active' ) ) {
 				// Get the BP data for this user
-				$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $user_info->ID, $bp_field_ids );
+				$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $user->ID, $bp_field_ids );
 
 				// Get the value of BP fields for this user
 				foreach ( $bp_get_data as $bp_field_value ) {
@@ -124,7 +120,7 @@ function excel_export_users() {
 			}
 
 			// set csv basic user data
-			foreach ( $basic as $k => $v ) {
+			foreach ( $user_content as $k => $v ) {
 				$spreadsheet->setActiveSheetIndex( 0 )
 							->SetCellValue( $k . $cell_count, $v );
 			}
@@ -140,30 +136,6 @@ function excel_export_users() {
 			if ( isset( $user_meta['session_tokens'] ) ) {
 				unset( $user_meta['session_tokens'] );
 			}
-
-			// todo: find a way to add/map the data correctly regardless of what columns a user has
-			/**
-			 * // Merge with the BuddyPress data if any
-			 * $all_meta = array_merge( $user_meta, $bp_field_data );
-			 *
-			 * // Add each user meta to appropriate excel column
-			 * foreach ( $all_meta as $meta ) {
-			 * $column_letter ++;
-			 * $meta_value = is_serialized( $meta ); // check if it's serialized
-			 * if (! $meta_value ) { // if unserialize() returns false, just get the meta value
-			 * $meta_value = $meta; // get the meta value
-			 * } else { // otherwise let's unserialized  the meta values
-			 * $meta_value = maybe_unserialize($meta);
-			 * $unserialized = [];
-			 * foreach ( $meta_value as $key => $value ) {
-			 * $unserialized[] = $key . ':' . $value;  // separate with a colon for readability
-			 * }
-			 * $meta_value = join( ', ', $unserialized ); // add comma separator for readability of multiple values
-			 * }
-			 * $spreadsheet->setActiveSheetIndex( 0 )
-			 * ->SetCellValue( $column_letter . $cell_count, $meta_value ); // add meta value to the right column and cell
-			 * }
-			 */
 		}
 		// get column labels, user_id 1 as a placeholder for all fields
 		$user_meta = get_user_meta( 1 );
@@ -181,16 +153,6 @@ function excel_export_users() {
 
 		// Reset column letter offset, A-G reserved for basic user data
 		$column_letter = 'K';
-
-		// Set up column labels for user meta
-		// todo: find a way to add/map the data correctly regardless of what columns a user has
-		/***
-		 * foreach ( $all_meta_labels as $field ) {
-		 * $column_letter ++;
-		 * $spreadsheet->setActiveSheetIndex( 0 )
-		 * ->SetCellValue( $column_letter . '1', $field );
-		 * }
-		 */
 
 		// Set document properties
 		$spreadsheet->getProperties()->setCreator( '' )
@@ -226,4 +188,48 @@ function excel_export_users() {
 		$writer->save( 'php://output' );
 		exit;
 	}
+
+	return;
+}
+
+/**
+ * @param $id
+ * @param $fields
+ * @param $consent
+ *
+ * @return array
+ */
+function get_from_users_table( $id, $fields, $consent ) {
+	$data = [];
+
+	$user_info        = get_userdata( $id );
+	$forbidden        = [
+		'user_pass',
+	];
+	$requires_consent = [
+		'display_name',
+		'first_name',
+		'last_name',
+		'user_email',
+	];
+	$requires_implode = [
+		'roles',
+	];
+
+	foreach ( $fields as $k => $info ) {
+		// protect PII
+		if ( in_array( $info, $requires_consent, true ) ) {
+			$info = ( $consent === '1' ) ? $user_info->data->$info : '';
+		} elseif ( in_array( $info, $requires_implode, true ) ) {
+			$info = implode( ', ', $user_info->$info );
+		} elseif ( in_array( $info, $forbidden, true ) ) {
+			$info = '';
+		} else {
+			$info = $user_info->data->$info;
+		}
+
+		$data[ $k ] = $info;
+	}
+
+	return $data;
 }
