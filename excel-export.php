@@ -26,7 +26,6 @@ if ( file_exists( $composer ) ) {
 /**
  * Check permission levels, only proceed if we can manage_options
  */
-
 add_action(
 	'init', function () {
 		if ( current_user_can( 'manage_options' ) ) {
@@ -42,7 +41,6 @@ add_action(
 /**
  * Add settings menu to the dashboard, and callback function for export page
  */
-
 function excel_export_admin_page() {
 	add_submenu_page( 'tools.php', 'Excel Export', 'Excel Export', 'manage_options', 'excel-export', 'excel_export_page' );
 }
@@ -50,7 +48,6 @@ function excel_export_admin_page() {
 /**
  * Settings page content
  */
-
 function excel_export_page() {
 	// user count
 	$user_count = count_users();

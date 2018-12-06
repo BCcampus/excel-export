@@ -105,9 +105,6 @@ function excel_export_users() {
 		foreach ( $wp_users as $user ) {
 			$cell_count ++;
 
-			// create dynamic array based on what we might expect to be held in the user database
-			//$user_fields = array_combine( $alpha_keys, array_keys( $user_data ) );
-
 			// users
 			$user_content = get_from_users_table( $user->ID, array_keys( $user_data ), $consent );
 
@@ -234,7 +231,14 @@ function get_from_usermeta_table( $id, $fields ) {
 	if ( empty( $fields ) ) {
 		return [];
 	}
-	$data      = [];
+	$data = [];
+
+	// ensures result length is the same coming in
+	// as going out
+	foreach ( $fields as $k => $v ) {
+		$data[ $k ] = $v;
+	}
+
 	$forbidden = [
 		'session_tokens',
 	];
@@ -260,13 +264,6 @@ function get_from_usermeta_table( $id, $fields ) {
 	foreach ( $forbidden as $remove ) {
 		if ( array_key_exists( $remove, $data ) ) {
 			unset( $data[ $remove ] );
-		}
-	}
-
-	// they may not have values set
-	if ( empty( $data ) && ! empty( $fields ) ) {
-		foreach ( $fields as $k => $v ) {
-			$data[] = '';
 		}
 	}
 
