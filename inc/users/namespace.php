@@ -71,15 +71,14 @@ function excel_export_users() {
 			'user_level'      => 'User Level',
 			'user_status'     => 'User Status',
 		];
-
-		// let developers hook in
-		apply_filters( 'excel_export_user_data', $user_data );
-
 		// no metadata by default
 		$user_metadata = [];
 
 		// let developers hook in
-		apply_filters( 'excel_export_user_metadata', $user_metadata );
+		$user_data = apply_filters( 'excel_export_user_data', $user_data );
+
+		// let developers hook in
+		$user_metadata = apply_filters( 'excel_export_user_metadata', $user_metadata );
 
 		// combine user and user_meta arrays
 		$combined = array_merge( $user_data, $user_metadata );
@@ -92,7 +91,9 @@ function excel_export_users() {
 		// create cell headers from the alpha keys and filtered values
 		$cell_headers = array_combine( $alpha_keys, array_values( $combined ) );
 
-		// set cell headers
+		/**
+		 * Set cell headers
+		 */
 		foreach ( $cell_headers as $k => $v ) {
 			$spreadsheet->setActiveSheetIndex( 0 )
 						->SetCellValue( $k . $cell_count, $v );
@@ -105,54 +106,36 @@ function excel_export_users() {
 			$cell_count ++;
 
 			// create dynamic array based on what we might expect to be held in the user database
-			$user_fields = array_combine( $alpha_keys, array_keys( $user_data ) );
+			//$user_fields = array_combine( $alpha_keys, array_keys( $user_data ) );
 
-			$user_content = get_from_users_table( $user->ID, $user_fields, $consent );
+			// users
+			$user_content = get_from_users_table( $user->ID, array_keys( $user_data ), $consent );
 
-			if ( function_exists( 'bp_is_active' ) ) {
-				// Get the BP data for this user
-				$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $user->ID, $bp_field_ids );
+			// usermeta
+			$user_meta = get_from_usermeta_table( $user->ID, $user_metadata );
 
-				// Get the value of BP fields for this user
-				foreach ( $bp_get_data as $bp_field_value ) {
-					$bp_field_data [] = $bp_field_value->value;
-				}
-			}
+			// combine user and meta
+			$all_data = array_merge( $user_content, $user_meta );
+
+			// give array combination alphabetic key values
+			$all_data_with_keys = array_combine( $alpha_keys, array_values( $all_data ) );
+
+			//          if ( function_exists( 'bp_is_active' ) ) {
+			//              // Get the BP data for this user
+			//              $bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $user->ID, $bp_field_ids );
+			//
+			//              // Get the value of BP fields for this user
+			//              foreach ( $bp_get_data as $bp_field_value ) {
+			//                  $bp_field_data [] = $bp_field_value->value;
+			//              }
+			//          }
 
 			// set csv basic user data
-			foreach ( $user_content as $k => $v ) {
+			foreach ( $all_data_with_keys as $k => $v ) {
 				$spreadsheet->setActiveSheetIndex( 0 )
 							->SetCellValue( $k . $cell_count, $v );
 			}
-
-			// Get all the user meta into an array, run array_map to take only the first index of each result
-			$user_meta = array_map(
-				function ( $a ) {
-					return $a[0];
-				}, get_user_meta( $user->ID )
-			);
-
-			// remove session tokens value as a preventative security measure
-			if ( isset( $user_meta['session_tokens'] ) ) {
-				unset( $user_meta['session_tokens'] );
-			}
 		}
-		// get column labels, user_id 1 as a placeholder for all fields
-		$user_meta = get_user_meta( 1 );
-
-		// remove session tokens label
-		if ( isset( $user_meta['session_tokens'] ) ) {
-			unset( $user_meta['session_tokens'] );
-		}
-
-		// Get all the keys, we'll use them as Column labels
-		$user_meta_fields = array_keys( $user_meta );
-
-		// Merge with BuddyPress labels if any
-		$all_meta_labels = array_merge( $user_meta_fields, $bp_field_names );
-
-		// Reset column letter offset, A-G reserved for basic user data
-		$column_letter = 'K';
 
 		// Set document properties
 		$spreadsheet->getProperties()->setCreator( '' )
@@ -200,6 +183,10 @@ function excel_export_users() {
  * @return array
  */
 function get_from_users_table( $id, $fields, $consent ) {
+	if ( empty( $fields ) ) {
+		return [];
+	}
+
 	$data = [];
 
 	$user_info        = get_userdata( $id );
@@ -216,20 +203,72 @@ function get_from_users_table( $id, $fields, $consent ) {
 		'roles',
 	];
 
-	foreach ( $fields as $k => $info ) {
+	foreach ( $fields as $info ) {
 		// protect PII
 		if ( in_array( $info, $requires_consent, true ) ) {
 			$info = ( $consent === '1' ) ? $user_info->data->$info : '';
+			// deal with arrays
 		} elseif ( in_array( $info, $requires_implode, true ) ) {
 			$info = implode( ', ', $user_info->$info );
+			// forbid certain data types
 		} elseif ( in_array( $info, $forbidden, true ) ) {
 			$info = '';
 		} else {
 			$info = $user_info->data->$info;
 		}
 
-		$data[ $k ] = $info;
+		$data[] = $info;
 	}
 
 	return $data;
+}
+
+
+/**
+ * @param $id
+ * @param $fields
+ *
+ * @return array
+ */
+function get_from_usermeta_table( $id, $fields ) {
+	if ( empty( $fields ) ) {
+		return [];
+	}
+	$data      = [];
+	$forbidden = [
+		'session_tokens',
+	];
+
+	// Get all the user meta into an array, run array_map to take only the first index of each result
+	$user_meta = array_map(
+		function ( $a ) {
+			return $a[0];
+		}, get_user_meta( $id )
+	);
+
+	foreach ( $fields as $k => $v ) {
+		if ( isset( $user_meta[ $k ] ) ) {
+			$data[ $k ] = maybe_unserialize( $user_meta[ $k ] );
+			if ( is_array( $data[ $k ] ) ) {
+				$csv        = implode( ', ', $data[ $k ] );
+				$data[ $k ] = $csv;
+			}
+		}
+	}
+
+	// remove information with potential security implications
+	foreach ( $forbidden as $remove ) {
+		if ( array_key_exists( $remove, $data ) ) {
+			unset( $data[ $remove ] );
+		}
+	}
+
+	// they may not have values set
+	if ( empty( $data ) && ! empty( $fields ) ) {
+		foreach ( $fields as $k => $v ) {
+			$data[] = '';
+		}
+	}
+
+	return array_values( $data );
 }
