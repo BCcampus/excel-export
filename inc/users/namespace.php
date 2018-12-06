@@ -28,8 +28,6 @@ function excel_export_users() {
 			'ID'              => 'User ID',
 			'user_login'      => 'Username',
 			'display_name'    => 'Display Name',
-			'first_name'      => 'First Name',
-			'last_name'       => 'Last Name',
 			'user_email'      => 'Email',
 			'user_url'        => 'URL',
 			'user_registered' => 'Registration Date',
@@ -222,8 +220,6 @@ function get_from_users_table( $id, $fields, $consent ) {
 	];
 	$requires_consent = [
 		'display_name',
-		'first_name',
-		'last_name',
 		'user_email',
 	];
 	$requires_implode = [
