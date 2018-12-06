@@ -136,11 +136,11 @@ function excel_export_users() {
  * @return array
  */
 function get_bp_fields() {
-	$bp_fields = [];
-
 	if ( ! function_exists( 'bp_is_active' ) ) {
 		return [];
 	}
+
+	$bp_fields = [];
 
 	$profile_groups = \BP_XProfile_Group::get(
 		[
@@ -197,7 +197,7 @@ function get_from_user_buddypress( $id, $fields, $bp_ids ) {
 		}
 	}
 
-	$data = array_combine( $data, $bp );
+	$data = ( false !== array_combine( $data, $bp ) ) ? array_combine( $data, $bp ) : [];
 
 	return array_values( $data );
 }
