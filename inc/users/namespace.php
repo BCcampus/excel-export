@@ -14,51 +14,17 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 function excel_export_users() {
 	// check if User data is being requested and nonce is valid
 	if ( ! empty( $_POST ) && isset( $_POST['users_export'] ) && check_admin_referer( 'export_button_users', 'submit_export_users' ) ) {
-
-		// Create a new spreadsheet
-		$spreadsheet = new Spreadsheet();
-
-		// Args for the user query
-		$args = [
+		$spreadsheet       = new Spreadsheet();
+		$args              = [
 			'order'   => 'ASC',
 			'orderby' => 'display_name',
 			'fields'  => 'all',
 		];
-
-		// User Query
-		$wp_users   = get_users( $args );
-		$cell_count = 1;
-
-		// BuddyPress user data placeholders
-		$bp_field_ids   = [];
-		$bp_field_names = [];
-		$bp_field_data  = [];
-
-		// Get BuddyPress profile field ID's and names
-		if ( function_exists( 'bp_is_active' ) ) {
-
-			$profile_groups = \BP_XProfile_Group::get(
-				[
-					'fetch_fields' => true,
-				]
-			);
-
-			if ( ! empty( $profile_groups ) ) {
-				foreach ( $profile_groups as $profile_group ) {
-					if ( ! empty( $profile_group->fields ) ) {
-						foreach ( $profile_group->fields as $field ) {
-							$bp_field_names[] = $field->name;
-							$bp_field_ids[]   = $field->id;
-						}
-					}
-				}
-			}
-		}
-
-		// don't include personally identifiable information in export by default
-		( isset( $_POST['users_export'] ) ) ? $consent = $_POST['consent'] : $consent = '0';
-		$alphabet                                      = range( 'A', 'Z' );
-		$user_data                                     = [
+		$wp_users          = get_users( $args );
+		$cell_count        = 1;
+		$consent           = ( isset( $_POST['users_export'] ) ) ? $_POST['consent'] : 0;
+		$alphabet          = range( 'A', 'Z' );
+		$default_user_data = [
 			'ID'              => 'User ID',
 			'user_login'      => 'Username',
 			'display_name'    => 'Display Name',
@@ -71,17 +37,22 @@ function excel_export_users() {
 			'user_level'      => 'User Level',
 			'user_status'     => 'User Status',
 		];
-		// no metadata by default
-		$user_metadata = [];
 
-		// let developers hook in
-		$user_data = apply_filters( 'excel_export_user_data', $user_data );
+		// optional
+		$default_user_meta       = [];
+		$default_user_buddypress = [];
 
-		// let developers hook in
-		$user_metadata = apply_filters( 'excel_export_user_metadata', $user_metadata );
+		// Get BuddyPress profile field ID's and names
+		$bp_fields = get_bp_fields();
+
+		// hooks
+		$default_user_data       = apply_filters( 'excel_export_user_data', $default_user_data );
+		$default_user_meta       = apply_filters( 'excel_export_user_metadata', $default_user_meta );
+		$default_user_buddypress = apply_filters( 'excel_export_user_buddypress', $default_user_buddypress );
 
 		// combine user and user_meta arrays
-		$combined = array_merge( $user_data, $user_metadata );
+		$combined = array_merge( $default_user_data, $default_user_meta );
+		$combined = array_merge( $combined, $default_user_buddypress );
 
 		$num_columns = count( $combined );
 
@@ -105,27 +76,16 @@ function excel_export_users() {
 		foreach ( $wp_users as $user ) {
 			$cell_count ++;
 
-			// users
-			$user_content = get_from_users_table( $user->ID, array_keys( $user_data ), $consent );
+			$user_content = get_from_users_table( $user->ID, array_keys( $default_user_data ), $consent );
+			$user_meta    = get_from_usermeta_table( $user->ID, $default_user_meta );
+			$user_buddy   = get_from_user_buddypress( $user->ID, $default_user_buddypress, $bp_fields );
 
-			// usermeta
-			$user_meta = get_from_usermeta_table( $user->ID, $user_metadata );
-
-			// combine user and meta
+			// combine
 			$all_data = array_merge( $user_content, $user_meta );
+			$all_data = array_merge( $all_data, $user_buddy );
 
 			// give array combination alphabetic key values
 			$all_data_with_keys = array_combine( $alpha_keys, array_values( $all_data ) );
-
-			//          if ( function_exists( 'bp_is_active' ) ) {
-			//              // Get the BP data for this user
-			//              $bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $user->ID, $bp_field_ids );
-			//
-			//              // Get the value of BP fields for this user
-			//              foreach ( $bp_get_data as $bp_field_value ) {
-			//                  $bp_field_data [] = $bp_field_value->value;
-			//              }
-			//          }
 
 			// set csv basic user data
 			foreach ( $all_data_with_keys as $k => $v ) {
@@ -170,6 +130,76 @@ function excel_export_users() {
 	}
 
 	return;
+}
+
+/**
+ * @return array
+ */
+function get_bp_fields() {
+	$bp_fields = [];
+
+	if ( ! function_exists( 'bp_is_active' ) ) {
+		return [];
+	}
+
+	$profile_groups = \BP_XProfile_Group::get(
+		[
+			'fetch_fields' => true,
+		]
+	);
+
+	if ( ! empty( $profile_groups ) ) {
+		foreach ( $profile_groups as $profile_group ) {
+			if ( ! empty( $profile_group->fields ) ) {
+				foreach ( $profile_group->fields as $field ) {
+					$bp_fields[ $field->id ] = $field->name;
+				}
+			}
+		}
+	}
+
+	return $bp_fields;
+}
+
+/**
+ * @param $id
+ * @param $fields
+ * @param $bp_ids
+ *
+ * @return array
+ */
+function get_from_user_buddypress( $id, $fields, $bp_ids ) {
+	if ( empty( $fields ) ) {
+		return [];
+	}
+	$field_ids = [];
+	$data      = [];
+	$bp        = [];
+	// ensures result length is the same coming in
+	// as going out
+	foreach ( $fields as $k => $v ) {
+		$data[ $k ] = $v;
+	}
+
+	foreach ( $bp_ids as $k => $v ) {
+		if ( array_key_exists( $v, $fields ) ) {
+			$field_ids[] = $k;
+		}
+	}
+
+	if ( function_exists( 'bp_is_active' ) && ! empty( $field_ids ) ) {
+		// Get the BP data for this user
+		$bp_get_data = \BP_XProfile_ProfileData::get_data_for_user( $id, $field_ids );
+
+		// Get the value of BP fields for this user
+		foreach ( $bp_get_data as $bp_field_value ) {
+			$bp[] = $bp_field_value->value;
+		}
+	}
+
+	$data = array_combine( $data, $bp );
+
+	return array_values( $data );
 }
 
 /**
