@@ -61,7 +61,7 @@ function excel_export_posts() {
 			// Set up column labels for post meta
 			foreach ( $post_labels as $label ) {
 				$spreadsheet->setActiveSheetIndex( 0 )
-							->SetCellValue( $column_letter . '1', esc_html__( $label ) );
+							->SetCellValue( $column_letter . '1', esc_html( $label ) );
 				$column_letter ++;
 			}
 

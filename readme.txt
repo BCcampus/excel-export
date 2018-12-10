@@ -1,12 +1,11 @@
 === Excel Export ===
 Contributors: aparedes, bdolor
-Donate link: http://bccampus.ca
 Tags: comments, spam
-Requires at least: 4.4
-Tested up to: 4.7.5
-Stable tag: 0.1.0
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Requires at least: 4.9.8
+Tested up to: 5.0.0
+Stable tag: 0.5.0
+License: GPLv3 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 Adds an export button to the admin user and event screens to export all event and user data.
 

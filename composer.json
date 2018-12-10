@@ -3,7 +3,7 @@
   "description": "Allows admins to export data to an excel file",
   "license": "GPL",
   "type": "wordpress-plugin",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "homepage": "https://github.com/BCcampus/excel-export/",
   "authors": [
     {
