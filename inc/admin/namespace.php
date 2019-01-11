@@ -31,6 +31,7 @@ function excel_export_page() {
 	$output     = 'names';
 	$operator   = 'and';
 	$post_types = get_post_types( $args, $output, $operator );
+	$post_types = apply_filters( 'excel_export_post_types', $post_types );
 
 	// page content
 	$html  = '<form action="#post-export" method="post">';
