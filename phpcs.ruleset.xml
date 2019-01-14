@@ -2,7 +2,6 @@
 <ruleset>
     <!-- Scan only PHP files -->
     <arg name="extensions" value="php"/>
-	<arg name="extensions" value="php"/>
 	<!-- Show colors in console -->
 	<arg value="-colors"/>
 	<!-- Show progress -->
