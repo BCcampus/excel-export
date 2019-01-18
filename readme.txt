@@ -29,4 +29,8 @@ This works with any and all post types and has filters for extending functionali
 == Changelog ==
 
 = 1.0.0 (2019-01-18)=
-*
+
+* [enhancement] update dependencies
+* [enhancement] enforce coding standards
+* [enhancement] add developer hooks for accepting customized user data
+* [enhancement] add developer hooks for accepting customized data
