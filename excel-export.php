@@ -3,10 +3,10 @@
  * Plugin Name:     Excel Export
  * Plugin URI:      https://github.com/BCcampus/excel-export
  * Description:     Export your posts, pages, custom post types, and user data to Excel file format (.XLSX)
- * Author:          Alex Paredes
+ * Author:          Alex Paredes, Brad Payne
  * Text Domain:     excel-export
  * Domain Path:     /languages
- * Version:         0.5.0
+ * Version:         1.0.0
  *
  * @package         Excel_Export
  */

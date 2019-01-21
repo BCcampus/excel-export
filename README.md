@@ -17,6 +17,19 @@ Get all of your WordPress data into Excel (.XLSX file). This plugin allows you t
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Click on the "Excel Export" menu item located under the Tools menu.
 
+## BuddyPress Extended profile data ##
+By default, extended profile data is not included in your export. To export this data please use [add_filter](https://developer.wordpress.org/reference/functions/add_filter/) as show below:
+```
+add_filter( 'excel_export_user_buddypress', function ( $default_user_buddypress ) {
+	$add_buddypress = [
+		'YourField'                  => 'YourField',
+		'AnotherField'               => 'AnotherField',
+	];
+	return array_merge( $default_user_buddypress, $add_buddypress );
+} );
+```
+
+
 ## Screenshots ##
 
 ![Export Button](/assets/img/settings.png)

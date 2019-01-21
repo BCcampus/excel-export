@@ -92,16 +92,91 @@ function excel_export_posts() {
 			$obj_writer->save( 'php://output' );
 
 			exit();
-		} else { // in the unlikely event an empty or invalid post type value is entered, let's display an ugly error
-			$post_value = $_POST['export_posts'];
-			if ( $post_value === '' ) {
-				$notice = __( 'Export Error: Please select a post type to export it.', 'excel-export' );
-			} else {
-				$notice = 'Excel Export: ' . $post_value . ' does not exist, please try a different post type.';
+		} elseif ( ! empty( $_POST['export_posts'] ) ) {
+			// try processing custom input
+			$data    = [];
+			$headers = [];
+			$headers = apply_filters( 'excel_export_custom_data_headers', $headers );
+			$data    = apply_filters( 'excel_export_custom_data', $data );
+
+			// match the post data with the array key which defines the data
+			if ( ! array_key_exists( $_POST['export_posts'], $headers ) ) {
+				return;
 			}
-			?>
-			<script type="text/javascript"><?php echo 'alert("' . $notice . '");'; ?></script>
-			<?php
+
+			$headers     = $headers[ $_POST['export_posts'] ];
+			$spreadsheet = new Spreadsheet();
+			$cell_count  = 1;
+			$alphabet    = range( 'A', 'Z' );
+			$num_columns = count( $headers );
+
+			// get keys for only what we need
+			$alpha_keys = array_splice( $alphabet, 0, $num_columns );
+
+			// create cell headers from the alpha keys and filtered values
+			$cell_headers = array_combine( $alpha_keys, array_values( $headers ) );
+
+			/**
+			 * Set cell headers
+			 */
+			if ( ! empty( $cell_headers ) ) {
+				foreach ( $cell_headers as $k => $v ) {
+					$spreadsheet->setActiveSheetIndex( 0 )
+								->SetCellValue( $k . $cell_count, $v );
+				}
+			}
+
+			foreach ( $data as $row ) {
+				$cell_count++;
+
+				$all_data_with_keys = array_combine( $alpha_keys, array_values( $row ) );
+
+				// set csv data
+				foreach ( $all_data_with_keys as $k => $v ) {
+					$spreadsheet->setActiveSheetIndex( 0 )
+								->SetCellValue( $k . $cell_count, $v );
+				}
+			}
+			// Set document properties
+			$spreadsheet->getProperties()->setCreator( '' )
+						->setLastModifiedBy( '' )
+						->setTitle( 'Custom' )
+						->setSubject( 'custom' )
+						->setDescription( 'Custom Export' )
+						->setKeywords( 'office 2007 custom export' )
+						->setCategory( 'custom results file' );
+
+			// auto size column width
+			foreach ( range( 'A', $spreadsheet->getActiveSheet()->getHighestDataColumn() ) as $col ) {
+				$spreadsheet->getActiveSheet()
+							->getColumnDimension( $col )
+							->setAutoSize( true );
+			}
+
+			// Rename sheet
+			$spreadsheet->getActiveSheet()->setTitle( 'Custom' );
+
+			// Set active sheet index to the first sheet, so Excel opens this as the first sheet
+			$spreadsheet->setActiveSheetIndex( 0 );
+
+			// Redirect output to a client’s web browser (Xlsx)
+			header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
+			header( 'Content-Disposition: attachment;filename="Custom.xlsx"' );
+			header( 'Cache-Control: max-age=0' );
+			// If you're serving to IE 9, then the following may be needed
+			header( 'Cache-Control: max-age=1' );
+
+			// Save Excel file
+			$writer = IOFactory::createWriter( $spreadsheet, 'Xlsx' );
+			$writer->save( 'php://output' );
+			exit;
+
+		} else {
+			$notice = 'Excel Export does not detect any data it can work with, please try again.';
 		}
+		?>
+		<script type="text/javascript"><?php echo 'alert("' . $notice . '");'; ?></script>
+		<?php
 	}
+
 }
